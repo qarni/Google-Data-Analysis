@@ -18,6 +18,7 @@ client = vision.ImageAnnotatorClient()
 jpg_list = []
 json_list = []
 
+
 for root, dirs, files in os.walk("photos/"):
     for filename in files:
         if filename.endswith(".JPG"):
@@ -28,7 +29,7 @@ for root, dirs, files in os.walk("photos/"):
 print(jpg_list)
 print(json_list)
 
-# Make this into a for each loop - do for each picture
+# TODO: Make this into a for each loop after everything works - do for each picture
 filename = jpg_list[0]
 
 # Loads the image into memory
