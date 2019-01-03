@@ -22,20 +22,19 @@ def get_images_list():
 
 
 def run_google_vision(filename):
-    """Gets label detection for the given filename"""
 
     # Loads the image into memory
-    # TODO: I guess that would mean that I should only put one photo in memory at a
-    # time...? (just open/close i guess?)
     with io.open(filename, 'rb') as image_file:
         content = image_file.read()
 
     image = types.Image(content=content)
 
-    # Performs label detection on the image file
-    response = client.label_detection(image=image)
-    # print(response)
+    run_label_detection(image, filename)
+    run_safe_search(image, filename)
 
+def run_label_detection(image, filename):
+    """Performs label detection on the image file"""
+    response = client.label_detection(image=image)
     update_json_with_label_detection(filename, response)
 
 
@@ -57,6 +56,34 @@ def update_json_with_label_detection(filename, response):
         orig = json.load(read)
 
     orig.update(label_dicts)
+
+    with open(filename, "w") as append:
+        json.dump(orig, append, indent=2)
+
+
+def run_safe_search(image, filename):
+    response = client.safe_search_detection(image=image)
+    update_json_with_safe_search(filename, response)
+
+def update_json_with_safe_search(filename, response):
+
+    # Names of likelihood from google.cloud.vision.enums
+    likelihood_name = ('UNKNOWN', 'VERY_UNLIKELY', 'UNLIKELY',
+            'POSSIBLE', 'LIKELY', 'VERY_LIKELY')
+
+    safe = response.safe_search_annotation
+
+    safe_annot = {'adult': likelihood_name[safe.adult], 'spoof':
+            likelihood_name[safe.spoof], 'medical':
+            likelihood_name[safe.medical], 'violence':
+            likelihood_name[safe.violence], 'racy': likelihood_name[safe.racy]}
+    safe_annot = {'safe_search_annotation': safe_annot}
+
+    filename = filename + ".json"
+    with open(filename) as read:
+        orig = json.load(read)
+
+    orig.update(safe_annot)
 
     with open(filename, "w") as append:
         json.dump(orig, append, indent=2)
