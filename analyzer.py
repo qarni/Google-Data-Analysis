@@ -27,14 +27,23 @@ def get_images_list():
 
 if __name__ == "__main__":
 
+    print("\nGoogle Photos Analyzer\n")
+
     # Instantiates a client
     client = vision.ImageAnnotatorClient()
 
     # Keep a list of all the jpgs
     jpg_list = get_images_list()
 
-    # TODO: Make this into a for each loop after everything works - do for each picture
-    # The name of the image file to annotate
-    filename = jpg_list[1]
+    # print a progress bar so we know how many pictures have been processed:
+    print("Total pictures to be processed: " + str(len(jpg_list)))
+    print("[ ", end="", flush=True)
 
-    initial_labeling.run_google_vision(client, filename)
+    for filename in jpg_list:
+        # The name of the image file to annotate
+        # print(filename)
+        initial_labeling.run_google_vision(client, filename)
+        print(".", end=" ", flush=True)
+
+    print("]\n")
+    print("Finished processing!")
