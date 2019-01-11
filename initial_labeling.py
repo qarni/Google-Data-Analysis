@@ -5,11 +5,51 @@ Manages all of initial google vision labeling:
 - appends/updates to original json
 """
 
+import os
 import io
 import json
 
 # Imports the Google Cloud client library
+from google.cloud import vision
 from google.cloud.vision import types
+
+# Instantiates a client
+client = vision.ImageAnnotatorClient()
+
+
+def get_images_list():
+    """Uses os.walk to go through all the photos in the photos directory, and
+    save a list of their names with their filepath for easy access.
+    The json files are ignored. """
+
+    jpgs = []
+
+    for root, dirs, files in os.walk("photos/"):
+        for filename in files:
+            if filename.endswith(".JPG"):
+                jpgs.append(os.path.join(root, filename))
+
+    return jpgs
+
+
+def start_labeling():
+
+    # Keep a list of all the jpgs
+    jpg_list = get_images_list()
+
+    # print a progress bar so we know how many pictures have been processed:
+    print("Total pictures to be processed: " + str(len(jpg_list)))
+    print("[ ", end="", flush=True)
+
+    for filename in jpg_list:
+        # The name of the image file to annotate
+        # print(filename)
+        run_google_vision(filename)
+        print(".", end=" ", flush=True)
+
+    print("]\n")
+    print("Finished processing!")
+
 
 def append_to_json(filename, new_json):
     """ append this json to the original file
@@ -26,7 +66,7 @@ def append_to_json(filename, new_json):
         json.dump(orig, append, indent=2)
 
 
-def run_google_vision(client, filename):
+def run_google_vision(filename):
     """Opens image as a google vision image type"""
 
     # Loads the image into memory
@@ -35,10 +75,10 @@ def run_google_vision(client, filename):
 
     image = types.Image(content=content)
 
-    run_label_detection(client, image, filename)
-    run_safe_search(client, image, filename)
+    run_label_detection(image, filename)
+    run_safe_search(image, filename)
 
-def run_label_detection(client, image, filename):
+def run_label_detection(image, filename):
     """Performs label detection on the image file"""
 
     response = client.label_detection(image=image)
@@ -46,7 +86,7 @@ def run_label_detection(client, image, filename):
     update_json_with_label_detection(filename, annotations)
 
 
-def run_safe_search(client, image, filename):
+def run_safe_search(image, filename):
     """Performs safe search on image file"""
 
     response = client.safe_search_detection(image=image)
