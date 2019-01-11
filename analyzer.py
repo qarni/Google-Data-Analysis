@@ -2,48 +2,29 @@
 Fatima Qarni - Google Photos Analyzer
 """
 
-import os
-
-# Imports the Google Cloud client library
-from google.cloud import vision
-
 import initial_labeling
-
-
-def get_images_list():
-    """Uses os.walk to go through all the photos in the photos directory, and
-    save a list of their names with their filepath for easy access.
-    The json files are ignored. """
-
-    jpgs = []
-
-    for root, dirs, files in os.walk("photos/"):
-        for filename in files:
-            if filename.endswith(".JPG"):
-                jpgs.append(os.path.join(root, filename))
-
-    return jpgs
-
+import search
 
 if __name__ == "__main__":
 
     print("\nGoogle Photos Analyzer\n")
 
-    # Instantiates a client
-    client = vision.ImageAnnotatorClient()
+    labeling = input("Have you updated your Google Takeout photos for analysis? (y/n) ")
+    if labeling is "y":
+        print("Okiedokes. Time to reanalyze.")
+        initial_labeling.start_labeling()
+        search.upload_json()
+    else:
+        print("Okay. Will continue with prior data.")
 
-    # Keep a list of all the jpgs
-    jpg_list = get_images_list()
+    # start search loop if input is y
+    cont_search = input("Would you like to search for any terms? (y/n) ")
 
-    # print a progress bar so we know how many pictures have been processed:
-    print("Total pictures to be processed: " + str(len(jpg_list)))
-    print("[ ", end="", flush=True)
+    while cont_search is "y":
 
-    for filename in jpg_list:
-        # The name of the image file to annotate
-        # print(filename)
-        initial_labeling.run_google_vision(client, filename)
-        print(".", end=" ", flush=True)
+        search.search()
 
-    print("]\n")
-    print("Finished processing!")
+        cont_search = input("Would you like to search for any more terms? (y/n) ")
+
+    print("Goodbye!")
+
