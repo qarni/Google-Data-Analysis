@@ -2,17 +2,17 @@
 Fatima Qarni - Google Photos Analyzer
 """
 
-import initial_labeling
+import labeling
 import search
 
 if __name__ == "__main__":
 
     print("\nGoogle Photos Analyzer\n")
 
-    labeling = input("Have you updated your Google Takeout photos for analysis? (y/n) ")
-    if labeling is "y":
+    label = input("Have you updated your Google Takeout photos for analysis? (y/n) ")
+    if label is "y":
         print("Okiedokes. Time to reanalyze.")
-        initial_labeling.start_labeling()
+        labeling.start_labeling()
         search.upload_json()
     else:
         print("Okay. Will continue with prior data.")

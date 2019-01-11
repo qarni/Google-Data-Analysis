@@ -2,6 +2,7 @@
 Manages all of initial google vision labeling:
 - basic label detection
 - safe search
+- text detection
 - appends/updates to original json
 """
 
@@ -77,6 +78,7 @@ def run_google_vision(filename):
 
     run_label_detection(image, filename)
     run_safe_search(image, filename)
+    run_document_text_detection(image, filename)
 
 def run_label_detection(image, filename):
     """Performs label detection on the image file"""
@@ -92,6 +94,14 @@ def run_safe_search(image, filename):
     response = client.safe_search_detection(image=image)
     annotations = response.safe_search_annotation
     update_json_with_safe_search(filename, annotations)
+
+
+def run_document_text_detection(image, filename):
+    """Performs text detection on image file"""
+
+    response = client.document_text_detection(image=image)
+    annotations = response.full_text_annotation
+    update_json_with_document_text_detection(filename, annotations)
 
 
 def update_json_with_label_detection(filename, annotations):
@@ -124,3 +134,20 @@ def update_json_with_safe_search(filename, annotations):
     safe_annot = {'safe_search_annotation': safe_annot}
 
     append_to_json(filename, safe_annot)
+
+def update_json_with_document_text_detection(filename, annotations):
+
+    doc_annot = []
+
+    for page in annotations.pages:
+        for block in page.blocks:
+            for paragraph in block.paragraphs:
+                for word in paragraph.words:
+                    word_text = ''.join([symbol.text for symbol in word.symbols])
+
+                    word_dict = {'word': word_text, 'confidence': word.confidence}
+                    doc_annot.append(word_dict)
+
+    doc_annot = {'document_text_annotation': doc_annot}
+
+    append_to_json(filename, doc_annot)
