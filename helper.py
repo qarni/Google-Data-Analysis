@@ -5,7 +5,7 @@ Program wide helper functions
 import os
 
 PHOTO_EXTENTIONS = [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp",
-    ".raw", ".ico", ".pdf", ".tiff"]
+                    ".raw", ".ico", ".pdf", ".tiff"]
 
 
 def get_file_list(extentions):

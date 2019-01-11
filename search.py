@@ -1,4 +1,9 @@
-import json, requests
+"""
+Everything that has to do with elastic search
+"""
+
+import json
+import requests
 
 from elasticsearch import Elasticsearch
 
@@ -21,8 +26,8 @@ def upload_json():
 
     # upload all current json files
     for curr_json in json_list:
-        f = open(curr_json)
-        docket_content = f.read()
+        json_file = open(curr_json)
+        docket_content = json_file.read()
         es.index(index='photo_jsons', ignore=400, doc_type='photo', id=curr_json, body=json.loads(docket_content))
 
 

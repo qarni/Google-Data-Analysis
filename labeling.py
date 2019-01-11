@@ -6,30 +6,31 @@ Manages all of initial google vision labeling:
 - appends/updates to original json
 """
 
-import io, json
-
-import helper
+import io
+import json
 
 # Imports the Google Cloud client library
 from google.cloud import vision
 from google.cloud.vision import types
 
+import helper
+
 # Instantiates a client
-client = vision.ImageAnnotatorClient()
+CLIENT = vision.ImageAnnotatorClient()
 
 
 def start_labeling():
+    """Gets all the photos and processes them"""
 
-    # Keep a list of all the jpgs
-    jpg_list = helper.get_file_list(helper.PHOTO_EXTENTIONS)
+    # Keep a list of all the photos
+    photo_list = helper.get_file_list(helper.PHOTO_EXTENTIONS)
 
     # print a progress bar so we know how many pictures have been processed:
-    print("Total pictures to be processed: " + str(len(jpg_list)))
+    print("\nTotal pictures to be processed: " + str(len(photo_list)))
     print("[ ", end="", flush=True)
 
-    for filename in jpg_list:
+    for filename in photo_list:
         # The name of the image file to annotate
-        # print(filename)
         run_google_vision(filename)
         print(".", end=" ", flush=True)
 
@@ -68,7 +69,7 @@ def run_google_vision(filename):
 def run_label_detection(image, filename):
     """Performs label detection on the image file"""
 
-    response = client.label_detection(image=image)
+    response = CLIENT.label_detection(image=image)
     annotations = response.label_annotations
     update_json_with_label_detection(filename, annotations)
 
@@ -76,7 +77,7 @@ def run_label_detection(image, filename):
 def run_safe_search(image, filename):
     """Performs safe search on image file"""
 
-    response = client.safe_search_detection(image=image)
+    response = CLIENT.safe_search_detection(image=image)
     annotations = response.safe_search_annotation
     update_json_with_safe_search(filename, annotations)
 
@@ -84,19 +85,19 @@ def run_safe_search(image, filename):
 def run_document_text_detection(image, filename):
     """Performs text detection on image file"""
 
-    response = client.document_text_detection(image=image)
+    response = CLIENT.document_text_detection(image=image)
     annotations = response.full_text_annotation
     update_json_with_document_text_detection(filename, annotations)
 
 
 def update_json_with_label_detection(filename, annotations):
-    """Converts all label annotations  """
+    """Converts all label annotations and appends to json """
 
     label_dicts = []
 
     for label in annotations:
         lab = {'mid': label.mid, 'description': label.description, 'score':
-                label.score, 'topicality': label.topicality}
+               label.score, 'topicality': label.topicality}
         label_dicts.append(lab)
 
     label_dicts = {'label_annotations': label_dicts}
@@ -105,22 +106,23 @@ def update_json_with_label_detection(filename, annotations):
 
 
 def update_json_with_safe_search(filename, annotations):
-    """ """
+    """Converts safe search annotations and appends to json"""
 
     # Names of likelihood from google.cloud.vision.enums
     likelihood_name = ('UNKNOWN', 'VERY_UNLIKELY', 'UNLIKELY',
-            'POSSIBLE', 'LIKELY', 'VERY_LIKELY')
+                       'POSSIBLE', 'LIKELY', 'VERY_LIKELY')
 
 
     safe_annot = {'adult': likelihood_name[annotations.adult], 'spoof':
-            likelihood_name[annotations.spoof], 'medical':
-            likelihood_name[annotations.medical], 'violence':
-            likelihood_name[annotations.violence], 'racy': likelihood_name[annotations.racy]}
+                  likelihood_name[annotations.spoof], 'medical':
+                  likelihood_name[annotations.medical], 'violence':
+                  likelihood_name[annotations.violence], 'racy': likelihood_name[annotations.racy]}
     safe_annot = {'safe_search_annotation': safe_annot}
 
     append_to_json(filename, safe_annot)
 
 def update_json_with_document_text_detection(filename, annotations):
+    """Converts all document text annotations and appends to json"""
 
     doc_annot = []
 
