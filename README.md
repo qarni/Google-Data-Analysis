@@ -1,7 +1,7 @@
 # Google Photos Analysis
 #### Fatima Qarni
 
-Thus far, this program will look at Google Photos data from Google Takeout (honestly, this will work for any photos - they don't neccessarily have to be from Google Photos, but that is the current intended use case). The photos will be analyzed using Google Vision and the new data will be appended to each photo's json metadata file. After this, search will be available (powered by Elastic Search) to search for anything in these newly updated json files.
+Thus far, this program will look at all photos from Google Takeout (honestly, this will work for any photos - they don't neccessarily have to be from Google, but that is the current intended use case). The photos will be analyzed using Google Vision and the new data will be appended to each photo's json metadata file. After this, search will be available (powered by Elastic Search) to search for anything in these newly updated json files.
 
 ### Things to get ready before use:
 
@@ -30,7 +30,9 @@ Thus far, this program will look at Google Photos data from Google Takeout (hone
 
 ### To run this program:
 
-1. Move your Google Photos Takeout files into a directory named `photos`
+1. Move your entire `Takeout` directory which you downloaded to the same level
+   as this program. If it split up the directory into several parts, move them
+   all into a new folder named `Takeout`
 
 1. Run elastic search on terminal with `elasticsearch`
 

@@ -9,7 +9,7 @@ if __name__ == "__main__":
 
     print("\nGoogle Photos Analyzer\n")
 
-    label = input("Have you updated your Google Takeout photos for analysis? (y/n) ")
+    label = input("Have you updated your Google Takeout files for analysis? (y/n) ")
     if label is "y":
         print("Okiedokes. Time to reanalyze.")
         labeling.start_labeling()

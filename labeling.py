@@ -8,6 +8,7 @@ Manages all of initial google vision labeling:
 
 import io
 import json
+import os
 
 # Imports the Google Cloud client library
 from google.cloud import vision
@@ -43,9 +44,41 @@ def append_to_json(filename, new_json):
         if the json file already has a section with the same name, it will just
         be overwritten (useful in test cases)"""
 
+    # if a photo does not have a json file, then create a json for it
+    # this may be the case for google drive photos
+    new_file_data = {
+        'title': filename,
+        'modificationTime': {
+            'timestamp': 'N/A',
+            'formatted': 'N/A'
+            },
+        'geoData': {
+            'latitude': 0.0,
+            'longitude': 0.0,
+            'altitude': 0.0,
+            'latitudeSpan': 0.0,
+            'longitudeSpan': 0.0
+            },
+        'geoDataExif': {
+            'latitude': 0.0,
+            'longitude': 0.0,
+            'altitude': 0.0,
+            'latitudeSpan': 0.0,
+            'longitudeSpan': 0.0
+            },
+        'photoTakenTime': {
+            'timestamp': 'N/A',
+            'formatted': 'N/A'
+            }
+        }
+
     filename = filename + ".json"
-    with open(filename) as read:
-        orig = json.load(read)
+
+    try:
+        with open(filename) as read:
+            orig = json.load(read)
+    except FileNotFoundError:
+        orig = new_file_data
 
     orig.update(new_json)
 
