@@ -8,7 +8,6 @@ Manages all of initial google vision labeling:
 
 import io
 import json
-import os
 
 # Imports the Google Cloud client library
 from google.cloud import vision
@@ -46,31 +45,34 @@ def append_to_json(filename, new_json):
 
     # if a photo does not have a json file, then create a json for it
     # this may be the case for google drive photos
-    new_file_data = {
-        'title': filename,
-        'modificationTime': {
-            'timestamp': 'N/A',
-            'formatted': 'N/A'
-            },
-        'geoData': {
-            'latitude': 0.0,
-            'longitude': 0.0,
-            'altitude': 0.0,
-            'latitudeSpan': 0.0,
-            'longitudeSpan': 0.0
-            },
-        'geoDataExif': {
-            'latitude': 0.0,
-            'longitude': 0.0,
-            'altitude': 0.0,
-            'latitudeSpan': 0.0,
-            'longitudeSpan': 0.0
-            },
-        'photoTakenTime': {
-            'timestamp': 'N/A',
-            'formatted': 'N/A'
+    if any((filename.lower().endswith(ext)) for ext in helper.PHOTO_EXTENTIONS):
+        new_file_data = {
+            'title': filename,
+            'modificationTime': {
+                'timestamp': 'N/A',
+                'formatted': 'N/A'
+                },
+            'geoData': {
+                'latitude': 0.0,
+                'longitude': 0.0,
+                'altitude': 0.0,
+                'latitudeSpan': 0.0,
+                'longitudeSpan': 0.0
+                },
+            'geoDataExif': {
+                'latitude': 0.0,
+                'longitude': 0.0,
+                'altitude': 0.0,
+                'latitudeSpan': 0.0,
+                'longitudeSpan': 0.0
+                },
+            'photoTakenTime': {
+                'timestamp': 'N/A',
+                'formatted': 'N/A'
+                }
             }
-        }
+    else:
+        new_file_data = {}
 
     filename = filename + ".json"
 
