@@ -22,9 +22,14 @@ if __name__ == "__main__":
 
     while cont_search is "y":
 
-        search.search()
+        search_term = input("Enter search term: ")
+        res = search.search(search_term)
+
+        # lists all files that contain the search term
+        print("%d documents found" % res['hits']['total'])
+        for doc in res['hits']['hits']:
+            print("%s" % (doc['_id']))
 
         cont_search = input("Would you like to search for any more terms? (y/n) ")
 
     print("Goodbye!")
-

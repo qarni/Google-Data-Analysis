@@ -4,10 +4,13 @@ Everything that has to do with elastic search
 
 import json
 import requests
+import time
 
 from elasticsearch import Elasticsearch
 
 import helper
+
+es = Elasticsearch()
 
 def upload_json():
     """
@@ -15,7 +18,6 @@ def upload_json():
     Gets list of all current jsons and uploads them to elastic search
     """
 
-    es = Elasticsearch()
     res = requests.get('http://localhost:9200')
 
     json_list = helper.get_file_list([".json"])
@@ -31,18 +33,19 @@ def upload_json():
         es.index(index='photo_jsons', ignore=400, doc_type='photo', id=curr_json, body=json.loads(docket_content))
 
 
-def search():
+
+
+def search(search_term):
     """
-    Allows a search for one search term and displays the number of search
+    Allows search for one search term and displays the number of search
     results, as well as a list of all files which contain the search term
+    Returns list of results
     """
 
-    es = Elasticsearch()
+    print(search_term)
 
-    search_term = input("Enter search term: ")
     res = es.search(index='photo_jsons', q=search_term)
 
-    # lists all files that contain the search term
-    print("%d documents found" % res['hits']['total'])
-    for doc in res['hits']['hits']:
-        print("%s" % (doc['_id']))
+    print(res)
+
+    return res

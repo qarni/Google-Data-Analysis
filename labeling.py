@@ -18,7 +18,6 @@ import helper
 # Instantiates a client
 CLIENT = vision.ImageAnnotatorClient()
 
-
 def start_labeling():
     """Gets all the photos and processes them"""
 
