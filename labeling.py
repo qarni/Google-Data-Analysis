@@ -18,7 +18,6 @@ import helper
 # Instantiates a client
 CLIENT = vision.ImageAnnotatorClient()
 
-
 def start_labeling():
     """Gets all the photos and processes them"""
 
@@ -101,6 +100,7 @@ def run_google_vision(filename):
     run_safe_search(image, filename)
     run_document_text_detection(image, filename)
 
+
 def run_label_detection(image, filename):
     """Performs label detection on the image file"""
 
@@ -155,6 +155,7 @@ def update_json_with_safe_search(filename, annotations):
     safe_annot = {'safe_search_annotation': safe_annot}
 
     append_to_json(filename, safe_annot)
+
 
 def update_json_with_document_text_detection(filename, annotations):
     """Converts all document text annotations and appends to json"""
