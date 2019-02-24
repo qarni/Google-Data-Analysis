@@ -20,10 +20,9 @@ CLIENT = vision.ImageAnnotatorClient()
 
 def start_labeling():
     """Gets all the photos and processes them"""
-    
-    helper.process_mbox()
 
-    # TODO: process all other attachments - add them to the list of documents to process
+    # get all info from gmail processed
+    helper.process_mbox()
 
     # Keep a list of all the photos
     photo_list = helper.get_file_list(helper.PHOTO_EXTENTIONS)

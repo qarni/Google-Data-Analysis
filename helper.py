@@ -3,13 +3,14 @@ Program wide helper functions
 """
 
 import os
-import imaplib
-import poplib
 import mailbox
 import email
 
 PHOTO_EXTENTIONS = [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp",
-                    ".raw", ".ico", ".tiff"]
+                    ".raw", ".ico", ".tif", ".tiff"]
+
+TEXT_EXTENSIONS = [".doc", ".docx", ".odt", ".pdf", ".rtf", ".tex", 
+                    "wks", ".wps", ".wpd"]
 
 
 def get_file_list(extentions):
@@ -30,16 +31,12 @@ def get_file_list(extentions):
 
 def process_mbox():
     """
-    TODO: EVERYTHING
     Process mbox file
-    1. Download all the attachments, and then they can be processed just like the other files are
-    2. Download the emails themselves as text files, and then they can be processed like other files too
+    Download all the attachments, and saves them in Takeout/mail_attachments/
+    TODO: Download the emails themselves as text files, and then they can be processed like other files too
     """
 
     mb = mailbox.mbox("Takeout/Mail/All mail Including Spam and Trash.mbox")
-
-    print("okay now i will try email \n\n\n\n\n")
-
     get_all_attachments(mb)
 
 def get_all_attachments(mb):
@@ -63,4 +60,4 @@ def get_all_attachments(mb):
                 file = open(dest, 'wb')
                 file.write(part.get_payload(decode=True))
                 file.close()
-            
+    

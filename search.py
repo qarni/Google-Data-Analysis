@@ -32,6 +32,22 @@ def upload_json():
         docket_content = json_file.read()
         es.index(index='photo_jsons', ignore=400, doc_type='photo', id=curr_json, body=json.loads(docket_content))
 
+    index_text_files()
+
+def index_text_files():
+    """
+    Process all other attachments - add them to the list of documents to process
+    TODO: add PDF files....not sure how to do that... might have to be with google vision?
+    """
+    
+    text_list = helper.get_file_list(helper.TEXT_EXTENSIONS)
+    print(text_list)
+
+    for curr_text in text_list:
+        text_file = open(curr_text)
+        file_content = text_file.read()
+        docket_content = {'filename': curr_text, 'doc_text': file_content}
+        es.index(index='text_jsons', ignore=400, doc_type='text', id=curr_text, body=json.dumps(docket_content))
 
 def search(search_term):
     """
@@ -42,7 +58,7 @@ def search(search_term):
 
     print(search_term)
 
-    res = es.search(index='photo_jsons', q=search_term)
+    res = es.search(index=['photo_jsons', 'text_jsons'], q=search_term)
 
     print(res)
 
