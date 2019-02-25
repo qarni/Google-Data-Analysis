@@ -22,8 +22,11 @@ def upload_json():
 
     # remove previous json files in case there's been an update to them for some
     # reason... this would probably only really happen in testing circumstances
-    es.indices.delete(index='photo_jsons')
-    es.indices.delete(index='text_jsons')
+    try:
+        es.indices.delete(index='photo_jsons')
+        es.indices.delete(index='text_jsons')
+    except Exception:
+        pass
 
     # upload all current json files
     index_photos()
@@ -48,7 +51,6 @@ def index_text_files():
     """
     
     text_list = helper.get_file_list(helper.TEXT_EXTENSIONS)
-    print(text_list)
 
     for curr_text in text_list:
         text_file = open(curr_text)
@@ -62,8 +64,6 @@ def search(search_term):
     results, as well as a list of all files which contain the search term
     Returns list of results
     """
-
-    # print(search_term)
+    
     res = es.search(index=['photo_jsons', 'text_jsons'], q=search_term)
-    # print(res)
     return res

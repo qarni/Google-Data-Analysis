@@ -10,7 +10,7 @@ PHOTO_EXTENTIONS = [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp",
                     ".raw", ".ico", ".tif", ".tiff"]
 
 TEXT_EXTENSIONS = [".doc", ".docx", ".odt", ".rtf", ".tex", "wks", 
-                   ".wps", ".wpd"]
+                   ".wps", ".wpd", ".txt"]
 
 
 def get_file_list(extentions):
@@ -67,13 +67,22 @@ def get_all_attachments(mb):
 
 def get_all_emails(mb):
     """
-    TODO: Downloads all emails and saves as json?
+    Downloads all emails and saves as txt files?
+
+    TODO: this just gets the subject it only sometimes gets the body of the email - WIP
     """
 
-    attach_folder = "Takeout/mail_text/"
-    if not os.path.exists(attach_folder):
-        os.makedirs(attach_folder)
+    mail_folder = "Takeout/mail_text/"
+    if not os.path.exists(mail_folder):
+        os.makedirs(mail_folder)
     
-    #for message in mb:
-    #    print(message['subject'])
-    #    print(message.get_payload(decode=True))
+    for message in mb:
+
+        dest = mail_folder + " " + message['subject'] + ".txt"
+
+        try:
+            with open(dest, 'w') as file:
+                file.write("Subject: " + message['subject'] + "\nText:\n" + str(message.get_payload(decode=True)))
+                file.close()
+        except Exception:
+            pass
