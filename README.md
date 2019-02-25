@@ -1,7 +1,7 @@
 # Google Photos Analysis
 #### Fatima Qarni
 
-Thus far, this program will look at all photos from Google Takeout (honestly, this will work for any photos - they don't neccessarily have to be from Google, but that is the current intended use case). The photos will be analyzed using Google Vision and the new data will be appended to each photo's json metadata file. After this, search will be available (powered by Elastic Search) to search for anything in these newly updated json files.
+This program will look at all photos and text documents from Google Takeout (honestly, this will work for any photos/documents - they don't neccessarily have to be from Google, but that is the current intended use case). The photos will be analyzed using Google Vision and the new data will be appended to each photo's json metadata file, which will then be uploaded to Elasticsearch, along with the other text based documents. After this, search will be available (powered by Elasticsearch) to search for anything in these newly updated json files.
 
 ### Things to get ready before use:
 
