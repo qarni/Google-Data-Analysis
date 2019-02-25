@@ -9,8 +9,8 @@ import email
 PHOTO_EXTENTIONS = [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp",
                     ".raw", ".ico", ".tif", ".tiff"]
 
-TEXT_EXTENSIONS = [".doc", ".docx", ".odt", ".pdf", ".rtf", ".tex", 
-                    "wks", ".wps", ".wpd"]
+TEXT_EXTENSIONS = [".doc", ".docx", ".odt", ".rtf", ".tex", "wks", 
+                   ".wps", ".wpd"]
 
 
 def get_file_list(extentions):
@@ -38,9 +38,13 @@ def process_mbox():
 
     mb = mailbox.mbox("Takeout/Mail/All mail Including Spam and Trash.mbox")
     get_all_attachments(mb)
+    get_all_emails(mb)
 
 def get_all_attachments(mb):
-    # source: stackoverflow.com/questions/18497397/how-to-get-csv-attachment-from-email-and-save-it
+    """
+    Downloads all attachments
+    source: stackoverflow.com/questions/18497397/how-to-get-csv-attachment-from-email-and-save-it
+    """
 
     attach_folder = "Takeout/mail_attachments/"
     if not os.path.exists(attach_folder):
@@ -60,4 +64,16 @@ def get_all_attachments(mb):
                 file = open(dest, 'wb')
                 file.write(part.get_payload(decode=True))
                 file.close()
+
+def get_all_emails(mb):
+    """
+    TODO: Downloads all emails and saves as json?
+    """
+
+    attach_folder = "Takeout/mail_text/"
+    if not os.path.exists(attach_folder):
+        os.makedirs(attach_folder)
     
+    #for message in mb:
+    #    print(message['subject'])
+    #    print(message.get_payload(decode=True))

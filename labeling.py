@@ -9,7 +9,9 @@ Manages all of initial google vision labeling:
 import io
 import json
 
+# from pyPDF2 import PdfFileReader
 # Imports the Google Cloud client library
+
 from google.cloud import vision
 from google.cloud.vision import types
 
@@ -26,16 +28,38 @@ def start_labeling():
 
     # Keep a list of all the photos
     photo_list = helper.get_file_list(helper.PHOTO_EXTENTIONS)
+    # Get a list of all the pdfs
+    pdf_list = helper.get_file_list('.pdf')
 
     # print a progress bar so we know how many pictures have been processed:
-    print("\nTotal pictures to be processed: " + str(len(photo_list)))
+    print("\nTotal pictures/pdfs to be processed: " + str(len(photo_list) + len(pdf_list) ))
     print("[ ", end="", flush=True)
 
     for filename in photo_list:
         # The name of the image file to annotate
-        run_google_vision(filename)
-        print(".", end=" ", flush=True)
+        try:
+            run_google_vision(filename)
+            print(".", end=" ", flush=True)
+        except Exception:
+            pass
 
+    # TODO THIS DOES NOT WORK CURRENTLY - do I need to use Google Cloud to do it remotely?
+    for filename in pdf_list:
+        # Google vision can only process a file of max 2000 pages 
+        # hopefully this will stop any textbooks from being processed as well
+    #    doc = pyPdf.PdfFileReader(open(filename))
+      #  if doc.getNumPages() < 2000:
+        try:
+            # I'm not sure how this document would be uploaded?
+            with io.open(filename, 'rb') as image_file:
+                content = image_file.read()
+            doc = types.Image(content=content)
+
+            run_document_text_detection(doc, filename)
+            print(".", end=" ", flush=True)
+        except Exception:
+            pass
+            
     print("]\n")
     print("Finished processing!")
 
@@ -74,7 +98,7 @@ def append_to_json(filename, new_json):
                 }
             }
     else:
-        new_file_data = {}
+        new_file_data = {'title': filename}
 
     filename = filename + ".json"
 
