@@ -9,7 +9,7 @@ def process_mbox():
     """
     Process mbox file
     Download all the attachments, and saves them in Takeout/mail_attachments/
-    TODO: Download the emails themselves as text files, and then they can be processed like other files too
+    Download the emails themselves as text files, and then they can be processed like other files too
     """
 
     mb = mailbox.mbox("Takeout/Mail/All mail Including Spam and Trash.mbox")
