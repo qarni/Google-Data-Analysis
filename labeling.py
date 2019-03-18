@@ -16,6 +16,7 @@ from google.cloud import vision
 from google.cloud.vision import types
 
 import helper
+import mailbox_processing
 
 # Instantiates a client
 CLIENT = vision.ImageAnnotatorClient()
@@ -24,7 +25,7 @@ def start_labeling():
     """Gets all the photos and processes them"""
 
     # get all info from gmail processed
-    helper.process_mbox()
+    mailbox_processing.process_mbox()
 
     # Keep a list of all the photos
     photo_list = helper.get_file_list(helper.PHOTO_EXTENTIONS)
