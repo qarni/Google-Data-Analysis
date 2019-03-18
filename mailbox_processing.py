@@ -46,7 +46,8 @@ def get_all_emails(mb):
     Downloads all emails and saves as txt files?
     source: https://stackoverflow.com/questions/26567843/reading-the-mail-content-of-an-mbox-file-using-python-mailbox
 
-    TODO: this just gets the subject it only sometimes gets the body of the email - WIP
+    Gets info and body
+    TODO: use JSON instead of txt
     """
 
     mail_folder = "Takeout/mail_text/"
