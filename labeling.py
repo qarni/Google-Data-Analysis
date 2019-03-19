@@ -9,6 +9,9 @@ Manages all of initial google vision labeling:
 import io
 import json
 
+import multiprocessing
+from multiprocessing.pool import ThreadPool
+
 # from pyPDF2 import PdfFileReader
 # Imports the Google Cloud client library
 
@@ -32,35 +35,20 @@ def start_labeling():
     # Get a list of all the pdfs
     pdf_list = helper.get_file_list('.pdf')
 
+    print(photo_list)
+
     # print a progress bar so we know how many pictures have been processed:
-    print("\nTotal pictures/pdfs to be processed: " + str(len(photo_list) + len(pdf_list) ))
+    print("\nTotal pictures to be processed: " + str(len(photo_list)))
     print("[ ", end="", flush=True)
 
-    for filename in photo_list:
-        # The name of the image file to annotate
-        try:
-            run_google_vision(filename)
-            print(".", end=" ", flush=True)
-        except Exception:
-            pass
+    pool = ThreadPool()
+    pool.map(run_google_vision, photo_list)
 
-    # TODO THIS DOES NOT WORK CURRENTLY - do I need to use Google Cloud to do it remotely?
-    for filename in pdf_list:
-        # Google vision can only process a file of max 2000 pages 
-        # hopefully this will stop any textbooks from being processed as well
-    #    doc = pyPdf.PdfFileReader(open(filename))
-      #  if doc.getNumPages() < 2000:
-        try:
-            # I'm not sure how this document would be uploaded?
-            with io.open(filename, 'rb') as image_file:
-                content = image_file.read()
-            doc = types.Image(content=content)
+    # TODO THIS DOES NOT WORK CURRENTLY - find a library to process pdfs
+    #for filename in pdf_list:
+    # only process a file of max 2000 pages 
+    # hopefully this will stop any textbooks from being processed as well
 
-            run_document_text_detection(doc, filename)
-            print(".", end=" ", flush=True)
-        except Exception:
-            pass
-            
     print("]\n")
     print("Finished processing!")
 
@@ -117,16 +105,21 @@ def append_to_json(filename, new_json):
 
 def run_google_vision(filename):
     """Opens image as a google vision image type"""
+    
+    try:
+        # Loads the image into memory
+        with io.open(filename, 'rb') as image_file:
+            content = image_file.read()
 
-    # Loads the image into memory
-    with io.open(filename, 'rb') as image_file:
-        content = image_file.read()
+        image = types.Image(content=content)
 
-    image = types.Image(content=content)
+        run_label_detection(image, filename)
+        run_safe_search(image, filename)
+        run_document_text_detection(image, filename)
+    except Exception:
+        pass
 
-    run_label_detection(image, filename)
-    run_safe_search(image, filename)
-    run_document_text_detection(image, filename)
+    print(".", end=" ", flush=True)
 
 
 def run_label_detection(image, filename):
