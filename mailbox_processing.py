@@ -12,9 +12,9 @@ def process_mbox():
     Download the emails themselves as text files, and then they can be processed like other files too
     """
 
-    mb = mailbox.mbox("Takeout/Mail/All mail Including Spam and Trash.mbox")
-    get_all_attachments(mb)
-    get_all_emails(mb)
+    #mb = mailbox.mbox("Takeout/Mail/All mail Including Spam and Trash.mbox")
+    #get_all_attachments(mb)
+    #get_all_emails(mb)
 
 def get_all_attachments(mb):
     """
@@ -55,8 +55,10 @@ def get_all_emails(mb):
         os.makedirs(mail_folder)
     
     for message in mb:
-
-        subject = str(header.make_header(header.decode_header(message['subject'])))
+        try:
+            subject = str(header.make_header(header.decode_header(message['subject'])))
+        except Exception:
+            subject = ""
         dest = mail_folder + subject + ".txt"
 
         content = get_email_body(message)
@@ -64,7 +66,7 @@ def get_all_emails(mb):
         try:
             with open(dest, 'w+') as file:
                 file.write("Date: " + message['Date'] + "\nMailbox:" + message['X-Gmail-Labels'] + "\nFrom: " + message['From'] + 
-                    "\nSubject: " + subject + "\nText:\n" + str(content))
+                    "\nTo: " + message['To'] + "\nSubject: " + subject + "\nText:\n" + str(content))
                 file.close()
         except Exception:         # not sure why there is an exception sometimes?
             pass
@@ -83,10 +85,13 @@ def get_email_body(message):
         try:
             return m.get_payload(decode = True).decode(charset)
         except UnicodeDecodeError:
-            charset = chardet.detect(m)['encoding']
-            return m.get_payload(decode = True).decode(charset)
+            try:
+                charset = chardet.detect(m)['encoding']
+                return m.get_payload(decode = True).decode(charset)
+            except Exception:
+                return ""
         except Exception:
-            pass
+                return ""
 
 
     def get_content(m):
