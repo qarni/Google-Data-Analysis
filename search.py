@@ -53,10 +53,14 @@ def index_text_files():
     text_list = helper.get_file_list(helper.TEXT_EXTENSIONS)
 
     for curr_text in text_list:
-        text_file = open(curr_text)
-        file_content = text_file.read()
-        docket_content = {'filename': curr_text, 'doc_text': file_content}
-        es.index(index='text_jsons', ignore=400, doc_type='text', id=curr_text, body=json.dumps(docket_content))
+        try:
+            text_file = open(curr_text)
+            file_content = text_file.read()
+            docket_content = {'filename': curr_text, 'doc_text': file_content}
+            es.index(index='text_jsons', ignore=400, doc_type='text', id=curr_text, body=json.dumps(docket_content))        
+        except Exception:
+            pass
+        
 
 def search(search_term):
     """

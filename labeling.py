@@ -32,6 +32,7 @@ def start_labeling():
 
     # Keep a list of all the photos
     photo_list = helper.get_file_list(helper.PHOTO_EXTENTIONS)
+
     # Get a list of all the pdfs
     pdf_list = helper.get_file_list('.pdf')
 
@@ -117,9 +118,10 @@ def run_google_vision(filename):
         run_safe_search(image, filename)
         run_document_text_detection(image, filename)
     except Exception:
+        print("mm something went wrong..")
         pass
 
-    print(".", end=" ", flush=True)
+    print(".", filename, end=" ", flush=True)
 
 
 def run_label_detection(image, filename):
@@ -159,6 +161,8 @@ def update_json_with_label_detection(filename, annotations):
     label_dicts = {'label_annotations': label_dicts}
 
     append_to_json(filename, label_dicts)
+
+    print("ee")
 
 
 def update_json_with_safe_search(filename, annotations):
