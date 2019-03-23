@@ -31,10 +31,10 @@ def start_labeling():
     mailbox_processing.process_mbox()
 
     # Keep a list of all the photos
-    photo_list = helper.get_file_list(helper.PHOTO_EXTENTIONS)
+    photo_list = helper.get_file_list(helper.PHOTO_EXTENTIONS, helper.PHOTO_FOLDER_LIST)
 
     # Get a list of all the pdfs
-    pdf_list = helper.get_file_list('.pdf')
+    pdf_list = helper.get_file_list('.pdf', helper.TEXT_FOLDER_LIST)
 
     print(photo_list)
 

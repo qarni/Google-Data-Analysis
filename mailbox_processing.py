@@ -12,9 +12,9 @@ def process_mbox():
     Download the emails themselves as text files, and then they can be processed like other files too
     """
 
-    #mb = mailbox.mbox("Takeout/Mail/All mail Including Spam and Trash.mbox")
-    #get_all_attachments(mb)
-    #get_all_emails(mb)
+    mb = mailbox.mbox("Takeout/Mail/All mail Including Spam and Trash.mbox")
+    get_all_attachments(mb)
+    get_all_emails(mb)
 
 def get_all_attachments(mb):
     """

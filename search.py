@@ -37,7 +37,7 @@ def index_photos():
     upload photo jsons
     TODO: hmm... i guess this would also upload non-photo jsons as well... do i care about that?
     """
-    json_list = helper.get_file_list([".json"])
+    json_list = helper.get_file_list([".json"], helper.PHOTO_FOLDER_LIST )
 
     for curr_json in json_list:
         json_file = open(curr_json)
@@ -50,7 +50,7 @@ def index_text_files():
     TODO: add PDF files....not sure how to do that... might have to be with google vision?
     """
     
-    text_list = helper.get_file_list(helper.TEXT_EXTENSIONS)
+    text_list = helper.get_file_list(helper.TEXT_EXTENSIONS, helper.TEXT_FOLDER_LIST)
 
     for curr_text in text_list:
         try:
