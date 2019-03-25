@@ -9,6 +9,11 @@ Manages all of initial google vision labeling:
 import io
 import json
 
+import multiprocessing
+from multiprocessing.pool import ThreadPool
+
+from queue import Queue
+
 # from pyPDF2 import PdfFileReader
 # Imports the Google Cloud client library
 
@@ -21,48 +26,39 @@ import mailbox_processing
 # Instantiates a client
 CLIENT = vision.ImageAnnotatorClient()
 
+# Makes a queue for the threads 
+photoDataQueue = Queue()
+
 def start_labeling():
     """Gets all the photos and processes them"""
 
+    print("Starting mailbox processing")
     # get all info from gmail processed
     mailbox_processing.process_mbox()
+    print("Finished mailbox processing")
 
     # Keep a list of all the photos
-    photo_list = helper.get_file_list(helper.PHOTO_EXTENTIONS)
+    photo_list = helper.get_file_list(helper.PHOTO_EXTENTIONS, helper.PHOTO_FOLDER_LIST)
+
     # Get a list of all the pdfs
-    pdf_list = helper.get_file_list('.pdf')
+    pdf_list = helper.get_file_list('.pdf', helper.TEXT_FOLDER_LIST)
 
     # print a progress bar so we know how many pictures have been processed:
-    print("\nTotal pictures/pdfs to be processed: " + str(len(photo_list) + len(pdf_list) ))
+    print("\nTotal pictures to be processed: " + str(len(photo_list)))
     print("[ ", end="", flush=True)
 
-    for filename in photo_list:
-        # The name of the image file to annotate
-        try:
-            run_google_vision(filename)
-            print(".", end=" ", flush=True)
-        except Exception:
-            pass
+    pool = ThreadPool()
+    pool.map(run_google_vision, photo_list)
 
-    # TODO THIS DOES NOT WORK CURRENTLY - do I need to use Google Cloud to do it remotely?
-    for filename in pdf_list:
-        # Google vision can only process a file of max 2000 pages 
-        # hopefully this will stop any textbooks from being processed as well
-    #    doc = pyPdf.PdfFileReader(open(filename))
-      #  if doc.getNumPages() < 2000:
-        try:
-            # I'm not sure how this document would be uploaded?
-            with io.open(filename, 'rb') as image_file:
-                content = image_file.read()
-            doc = types.Image(content=content)
+    # TODO THIS DOES NOT WORK CURRENTLY - find a library to process pdfs
+    #for filename in pdf_list:
+    # only process a file of max 2000 pages 
+    # hopefully this will stop any textbooks from being processed as well
 
-            run_document_text_detection(doc, filename)
-            print(".", end=" ", flush=True)
-        except Exception:
-            pass
-            
     print("]\n")
     print("Finished processing!")
+
+    createPhotoDateJson()
 
 
 def append_to_json(filename, new_json):
@@ -117,16 +113,76 @@ def append_to_json(filename, new_json):
 
 def run_google_vision(filename):
     """Opens image as a google vision image type"""
+    
+    try:
+        # Loads the image into memory
+        with io.open(filename, 'rb') as image_file:
+            content = image_file.read()
 
-    # Loads the image into memory
-    with io.open(filename, 'rb') as image_file:
-        content = image_file.read()
+        image = types.Image(content=content)
 
-    image = types.Image(content=content)
+        run_label_detection(image, filename)
+        run_safe_search(image, filename)
+        run_document_text_detection(image, filename)
 
-    run_label_detection(image, filename)
-    run_safe_search(image, filename)
-    run_document_text_detection(image, filename)
+        printToQueue(filename)
+
+    except Exception:
+        print("mm something went wrong with runnig..")
+        pass
+
+    print(".", filename, end=" ", flush=True)
+
+
+def printToQueue(filename):
+    """writes available data to queue for future use"""
+
+    json_filename = filename + ".json"
+
+    try:
+        with open(json_filename) as read:
+            orig = json.load(read)
+            # TODO: check to make sure this is the right time variable to use rather than one of the others
+            # TODO: check to make sure this format for the time is ok... otherwise maybe change?
+            date = orig['photoTakenTime']['formatted']
+            # date is spliced to only include date, not time
+            date = ",".join(date.split(",", 2)[:2])
+
+            # if the data is available, then add it to the photo dates json 
+            # otherwise - do not add to file (but it can still be found from elasticsearch)
+            if date != 'N/A' and date != '':
+                # currently need: date, filename TODO: add more things here later
+                # TODO: Google drive pics/etc don't have dates... can that be fixed?
+
+                new_json_entry = {
+                    'date': date,
+                    'filename': filename
+                }
+                photoDataQueue.put(new_json_entry)
+
+    except Exception:
+        print("something is wrong with the queueing")
+        return
+
+
+def createPhotoDateJson():
+    """
+    get everything from the queue and add to one json file
+    TODO: this needs to be in a good format to actually graph... I have the x
+    var, but not ay var. Maybe I can use an aggregation function of some sort? Idk.
+    Work on this next.
+    """
+
+    photo_data_json_filename = "photo_data.json"
+
+    full_json = []
+    while photoDataQueue.qsize():
+        full_json.append(photoDataQueue.get())
+
+    full_json = {'photo_data': full_json}
+
+    with open(photo_data_json_filename, "w") as write:
+        json.dump(full_json, write, indent=2)
 
 
 def run_label_detection(image, filename):
@@ -166,6 +222,8 @@ def update_json_with_label_detection(filename, annotations):
     label_dicts = {'label_annotations': label_dicts}
 
     append_to_json(filename, label_dicts)
+
+    print("ee")
 
 
 def update_json_with_safe_search(filename, annotations):
