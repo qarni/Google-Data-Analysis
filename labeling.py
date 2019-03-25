@@ -58,10 +58,7 @@ def start_labeling():
     print("]\n")
     print("Finished processing!")
 
-    if len(photo_list) > 0:
-        createPhotoDateJson()
-    else:
-        pass
+    createPhotoDateJson()
 
 
 def append_to_json(filename, new_json):
@@ -138,17 +135,25 @@ def run_google_vision(filename):
 
 
 def printToQueue(filename):
+    """writes available data to queue for future use"""
+
     json_filename = filename + ".json"
 
     try:
         with open(json_filename) as read:
             orig = json.load(read)
+            # TODO: check to make sure this is the right time variable to use rather than one of the others
+            # TODO: check to make sure this format for the time is ok... otherwise maybe change?
             date = orig['photoTakenTime']['formatted']
+            # date is spliced to only include date, not time
+            date = ",".join(date.split(",", 2)[:2])
 
             # if the data is available, then add it to the photo dates json 
             # otherwise - do not add to file (but it can still be found from elasticsearch)
             if date != 'N/A' and date != '':
-                # need: date, filename TODO: add more things here later
+                # currently need: date, filename TODO: add more things here later
+                # TODO: Google drive pics/etc don't have dates... can that be fixed?
+
                 new_json_entry = {
                     'date': date,
                     'filename': filename
@@ -161,9 +166,15 @@ def printToQueue(filename):
 
 
 def createPhotoDateJson():
+    """
+    get everything from the queue and add to one json file
+    TODO: this needs to be in a good format to actually graph... I have the x
+    var, but not ay var. Maybe I can use an aggregation function of some sort? Idk.
+    Work on this next.
+    """
+
     photo_data_json_filename = "photo_data.json"
 
-    # get everything from the queue and add to one json object
     full_json = []
     while photoDataQueue.qsize():
         full_json.append(photoDataQueue.get())
@@ -172,7 +183,6 @@ def createPhotoDateJson():
 
     with open(photo_data_json_filename, "w") as write:
         json.dump(full_json, write, indent=2)
-    
 
 
 def run_label_detection(image, filename):
