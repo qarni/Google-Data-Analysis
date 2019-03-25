@@ -12,6 +12,8 @@ import json
 import multiprocessing
 from multiprocessing.pool import ThreadPool
 
+from queue import Queue
+
 # from pyPDF2 import PdfFileReader
 # Imports the Google Cloud client library
 
@@ -24,19 +26,22 @@ import mailbox_processing
 # Instantiates a client
 CLIENT = vision.ImageAnnotatorClient()
 
+# Makes a queue for the threads 
+photoDataQueue = Queue()
+
 def start_labeling():
     """Gets all the photos and processes them"""
 
+    print("Starting mailbox processing")
     # get all info from gmail processed
     mailbox_processing.process_mbox()
+    print("Finished mailbox processing")
 
     # Keep a list of all the photos
     photo_list = helper.get_file_list(helper.PHOTO_EXTENTIONS, helper.PHOTO_FOLDER_LIST)
 
     # Get a list of all the pdfs
     pdf_list = helper.get_file_list('.pdf', helper.TEXT_FOLDER_LIST)
-
-    print(photo_list)
 
     # print a progress bar so we know how many pictures have been processed:
     print("\nTotal pictures to be processed: " + str(len(photo_list)))
@@ -52,6 +57,11 @@ def start_labeling():
 
     print("]\n")
     print("Finished processing!")
+
+    if len(photo_list) > 0:
+        createPhotoDateJson()
+    else:
+        pass
 
 
 def append_to_json(filename, new_json):
@@ -117,11 +127,52 @@ def run_google_vision(filename):
         run_label_detection(image, filename)
         run_safe_search(image, filename)
         run_document_text_detection(image, filename)
+
+        printToQueue(filename)
+
     except Exception:
-        print("mm something went wrong..")
+        print("mm something went wrong with runnig..")
         pass
 
     print(".", filename, end=" ", flush=True)
+
+
+def printToQueue(filename):
+    json_filename = filename + ".json"
+
+    try:
+        with open(json_filename) as read:
+            orig = json.load(read)
+            date = orig['photoTakenTime']['formatted']
+
+            # if the data is available, then add it to the photo dates json 
+            # otherwise - do not add to file (but it can still be found from elasticsearch)
+            if date != 'N/A' and date != '':
+                # need: date, filename TODO: add more things here later
+                new_json_entry = {
+                    'date': date,
+                    'filename': filename
+                }
+                photoDataQueue.put(new_json_entry)
+
+    except Exception:
+        print("something is wrong with the queueing")
+        return
+
+
+def createPhotoDateJson():
+    photo_data_json_filename = "photo_data.json"
+
+    # get everything from the queue and add to one json object
+    full_json = []
+    while photoDataQueue.qsize():
+        full_json.append(photoDataQueue.get())
+
+    full_json = {'photo_data': full_json}
+
+    with open(photo_data_json_filename, "w") as write:
+        json.dump(full_json, write, indent=2)
+    
 
 
 def run_label_detection(image, filename):
