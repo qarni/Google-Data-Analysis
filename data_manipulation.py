@@ -19,6 +19,19 @@ def createDateCSV(dataQueue, csvFilename):
         for item in full_json_list:
             writer.writerow(item)
 
+def splitEmailCSV():
+    origEmailCSV = "graph_data/email_data.csv"
+    sentEmailCSV = "graph_data/sent_email_data.csv"
+    receivedEmailCSV = "graph_data/received_email_data.csv"
+
+    origEmail = pd.read_csv(origEmailCSV)
+
+    sentEmail = origEmail.loc[origEmail['mailbox'].str.contains("Sent")==True]
+    receivedEmail = origEmail.loc[origEmail['mailbox'].str.contains("Sent")==False]
+
+    sentEmail.to_csv(sentEmailCSV, index=False)
+    receivedEmail.to_csv(receivedEmailCSV, index=False)
+
 def getHoverText(row):
     filenames = list(date_group['filename'].get_group(row[0]))
     filenames = ", ".join(str(name) for name in filenames)

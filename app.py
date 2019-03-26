@@ -12,8 +12,8 @@ external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
 photo_counts = data_manipulation.aggregateDataByDate("graph_data/photo_data.csv")
-email_counts = data_manipulation.aggregateDataByDate("graph_data/email_data.csv")
-
+sent_email_counts = data_manipulation.aggregateDataByDate("graph_data/sent_email_data.csv")
+received_email_counts = data_manipulation.aggregateDataByDate("graph_data/received_email_data.csv")
 
 app.layout = html.Div([
     
@@ -23,16 +23,16 @@ app.layout = html.Div([
         id='Google Photos Over Time',
         figure={
             'data': [{
-                'x':photo_counts['date'],
-                'y':photo_counts['counts'],
-                'mode':'lines+markers',
+                'x': photo_counts['date'],
+                'y': photo_counts['counts'],
+                'mode': 'lines+markers',
                 'line': {
-                    'width': 3
+                    'width': 1
                 }
             }],
             'layout': go.Layout(
                 xaxis={'title': 'Date'},
-                yaxis={'title': 'Count per Day'},
+                yaxis={'title': 'Number of Photos'},
                 hovermode='closest', 
                 title="Google Photos Over Time"
             )
@@ -43,23 +43,31 @@ app.layout = html.Div([
         id='Gmail Over Time',
         figure={
             'data': [{
-                'x':email_counts['date'],
-                'y':email_counts['counts'],
+                'x': sent_email_counts['date'],
+                'y': sent_email_counts['counts'],
+                'name': 'Sent Emails',
+                'mode': 'lines+markers',
+                'line': {
+                    'width': 1
+                }
+            }, 
+            {
+                'x': received_email_counts['date'],
+                'y': received_email_counts['counts'],
+                'name': 'Received Emails',
                 'mode':'lines+markers',
                 'line': {
-                    'width': 3
+                    'width': 1
                 }
             }],
             'layout': go.Layout(
                 xaxis={'title': 'Date'},
-                yaxis={'title': 'Count per Day'},
+                yaxis={'title': 'Number of Emails'},
                 hovermode='closest', 
                 title="Gmail Over Time"
             )
         }
     )
-
-
 ])
 
 if __name__ == "__main__":

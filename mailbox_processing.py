@@ -27,6 +27,7 @@ def process_mbox():
 
     # make csv
     data_manipulation.createDateCSV(emailDataQueue, "graph_data/email_data.csv")
+    data_manipulation.splitEmailCSV()
 
     print("Finished mailbox processing")
 
