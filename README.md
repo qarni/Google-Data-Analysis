@@ -1,11 +1,21 @@
-# Google Photos Analysis
+# Google Pensieve: a Google Data Analysis Tool
 #### Fatima Qarni
 
-This program will look at all photos and text documents from Google Takeout (honestly, this will work for any photos/documents - they don't neccessarily have to be from Google, but that is the current intended use case). The photos will be analyzed using Google Vision and the new data will be appended to each photo's json metadata file, which will then be uploaded to Elasticsearch, along with the other text based documents. After this, search will be available (powered by Elasticsearch) to search for anything in these newly updated json files.
+This project has two parts: an analyzer script and a visualization/GUI.
+
+The analyzer program will look at all photos, emails, and text documents from Google Takeout (honestly, this will work for any mailbox/photos/documents - I guess they don't neccessarily have to be from Google, but that is the intended use case). An interesting expansion may be to add other social media data to the visualizations.
+
+- The photos will be analyzed using Google Vision and the new data will be appended to each photo's json metadata file.
+- The mailbox file for Gmail is analyzed; all emails are downloaded as text files and all attachments are downloaded and saved.
+- Metadata files for each type of data (photos from both Photos/Drive and emails, so far) will then be uploaded to Elasticsearch, along with the other text based documents. 
+- After this, search will be available (powered by Elasticsearch) to search for anything in these newly updated json files.
+- All data that has a date will be saved in csv files with just a filename/minimal data
+
+The visualization will show graphs of the data available from the analyzation.
 
 ### Things to get ready before use:
 
-1. Make sure you have python installed.
+1. Make sure you have python 3 installed.
 
 1. Get your Google Takeout data downloaded from here: [Google Takeout](https://takeout.google.com/settings/takeout)
 
@@ -17,8 +27,7 @@ This program will look at all photos and text documents from Google Takeout (hon
 1. Install elastic search: [Elastic Search](https://www.elastic.co/guide/en/elasticsearch/reference/current/getting-started-install.html)
 
 1. Install elastic search for python:
-`pip elasticsearch`
-
+`pip elasticsearch` (or) `pip3 elasticsearch`
 
 #### Set up Google Vision:
 
@@ -27,8 +36,9 @@ This program will look at all photos and text documents from Google Takeout (hon
 1. Once complete, download credentials file and run this command:
 `export GOOGLE_APPLICATION_CREDENTIALS=[path_to_file]`
 
+#### Install any other libraries used that you may not have installed....
 
-### To run this program:
+### To run the analyzer program:
 
 1. Move your entire `Takeout` directory which you downloaded to the same level
    as this program. If it split up the directory into several parts, move them
@@ -38,3 +48,11 @@ This program will look at all photos and text documents from Google Takeout (hon
 
 1. In a separate terminal pane, run program with the command:
 `python3 analyzer.py`
+
+
+### To run the visualization/GUI program:
+
+1. After running the analyzer program, open the `analyzer` folder in a terminal pane and run the command: `python3 app.py`
+
+1. This will launch the app on local host, so it can be viewed at the given address/port printed in terminal. On my computer that is: `http://127.0.0.1:8050/`
+
