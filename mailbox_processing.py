@@ -22,7 +22,7 @@ def process_mbox():
 
     print("Starting mailbox processing")
     mb = mailbox.mbox("Takeout/Mail/All mail Including Spam and Trash.mbox")
-    get_all_attachments(mb)
+    #get_all_attachments(mb)
     get_all_emails(mb)
 
     # make csv
@@ -74,21 +74,32 @@ def get_all_emails(mb):
             subject = str(header.make_header(header.decode_header(message['subject'])))
         except Exception:
             subject = "n/a"
-        dest = mail_folder + str(counter) + ": " + subject + ".txt"
+        dest = mail_folder + str(counter) + "-" + subject + ".txt"
 
         content = get_email_body(message)
-
-        counter += 1
+        date = str(message['Date'])
+        mailboxes = str(message['X-Gmail-Labels'])
+        from_e = str(message['From'])
+        to_e = str(message['To'])
 
         try:
             with open(dest, 'w+') as file:
-                file.write("Date: " + message['Date'] + "\nMailbox:" + message['X-Gmail-Labels'] + "\nFrom: " + message['From'] + 
-                    "\nTo: " + message['To'] + "\nSubject: " + subject + "\nText:\n" + str(content))
+                file.write("Date: " + date + "\nMailbox:" + mailboxes + "\nFrom: " + from_e + 
+                    "\nTo: " + to_e + "\nSubject: " + subject + "\nText:\n" + str(content))
                 file.close()
-            
-            printToQueue(message, subject)
-        except Exception:         # not sure why there is an exception sometimes?
-            pass
+        except Exception:         
+            try:
+                new_dest = mail_folder + str(counter-1) + "-na.txt"
+                with open(new_dest, 'w+') as file:
+                    file.write("Date: " + date + "\nMailbox:" + mailboxes + "\nFrom: " + from_e + 
+                    "\nTo: " + to_e + "\nSubject: " + subject + "\nText:\n" + str(content))
+                file.close()
+            except Exception:    # not sure why there is an exception sometimes?
+                pass
+
+        printToQueue(message, subject)
+
+        counter += 1
         
 def get_email_body(message):
     """
@@ -150,9 +161,34 @@ def printToQueue(message, subject):
         date = message['Date']
 
         if date != 'N/A' and date != '':
-            date = " ".join(date.split(" ", 4)[:4])
+            
+            # try all the different options
+            try:
+                datetimeobject = datetime.strptime(date,'%a, %d %b %Y %H:%M:%S %z')
+            except Exception:
+                try:
+                    datetimeobject = datetime.strptime(date,'%a, %d %b %Y %H:%M:%S %z (%Z)')
+                except Exception:
+                    try:
+                        datetimeobject = datetime.strptime(date,'%a, %d %b %Y %H:%M:%S %Z')
+                    except Exception:
+                        try:
+                            datetimeobject = datetime.strptime(date,'%a, %d %b %Y %H:%M:%S %z')
+                        except Exception:
+                            try:
+                                datetimeobject = datetime.strptime(date,'%d %b %Y %H:%M:%S %z')
+                            except Exception:
+                                try:
+                                    date = ",".join(date.split(",", 4)[:4])
+                                    datetimeobject = datetime.strptime(date,'%a, %d %b %Y')
+                                except Exception:
+                                    try:
+                                        date = ",".join(date.split(",", 3)[:3])
+                                        datetimeobject = datetime.strptime(date,'%d %b %Y')
+                                    except Exception:
+                                        #print(date)
+                                        return
 
-            datetimeobject = datetime.strptime(date,'%a, %d %b %Y')
             date = datetimeobject.strftime('%Y-%m-%d')  
 
             new_json_entry = {
@@ -163,5 +199,6 @@ def printToQueue(message, subject):
             emailDataQueue.put(new_json_entry)
 
     except Exception:
+        #print(date)
         print("something is wrong with the queueing")
         return
