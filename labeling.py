@@ -4,6 +4,8 @@ Manages all of initial google vision labeling:
 - safe search
 - text detection
 - appends/updates to original json
+
+Also calls for email processing
 """
 
 import io
@@ -33,21 +35,27 @@ CLIENT = vision.ImageAnnotatorClient()
 photoDataQueue = Queue()
 
 def start_labeling():
-    """Gets all the photos and processes them"""
+    """Gets all the emails and photos and processes them"""
 
     if not os.path.exists("graph_data/"):
         os.makedirs("graph_data/")
 
-    print("Starting mailbox processing")
     # get all info from gmail processed
     mailbox_processing.process_mbox()
-    print("Finished mailbox processing")
 
-    # Keep a list of all the photos
-    photo_list = helper.get_file_list(helper.PHOTO_EXTENTIONS, helper.PHOTO_FOLDER_LIST)
-
+    # Gets all the photos and processes them
+    process_photos()
+   
+    # TODO THIS DOES NOT WORK CURRENTLY - find a library to process pdfs
+    # only process a file of max 2000 pages 
+    # hopefully this will stop any textbooks from being processed as well
     # Get a list of all the pdfs
-    pdf_list = helper.get_file_list('.pdf', helper.TEXT_FOLDER_LIST)
+    # pdf_list = helper.get_file_list('.pdf', helper.TEXT_FOLDER_LIST)
+
+
+def process_photos():
+     # Keep a list of all the photos
+    photo_list = helper.get_file_list(helper.PHOTO_EXTENTIONS, helper.PHOTO_FOLDER_LIST)
 
     # print a progress bar so we know how many pictures have been processed:
     print("\nTotal pictures to be processed: " + str(len(photo_list)))
@@ -56,16 +64,10 @@ def start_labeling():
     pool = ThreadPool()
     pool.map(run_google_vision, photo_list)
 
-    # TODO THIS DOES NOT WORK CURRENTLY - find a library to process pdfs
-    #for filename in pdf_list:
-    # only process a file of max 2000 pages 
-    # hopefully this will stop any textbooks from being processed as well
-
     print("]\n")
     print("Finished processing!")
 
     data_manipulation.createDateCSV(photoDataQueue, "graph_data/photo_data.csv")
-
 
 def append_to_json(filename, new_json):
     """ append this json to the original file

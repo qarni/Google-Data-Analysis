@@ -20,12 +20,15 @@ def process_mbox():
     Download the emails themselves as text files, and then they can be processed like other files too
     """
 
+    print("Starting mailbox processing")
     mb = mailbox.mbox("Takeout/Mail/All mail Including Spam and Trash.mbox")
     get_all_attachments(mb)
     get_all_emails(mb)
 
     # make csv
     data_manipulation.createDateCSV(emailDataQueue, "graph_data/email_data.csv")
+
+    print("Finished mailbox processing")
 
 def get_all_attachments(mb):
     """
