@@ -11,8 +11,8 @@ import data_manipulation
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
-photo_counts = data_manipulation.aggregateDataByDate("photo_data.csv")
-email_counts = data_manipulation.aggregateDataByDate("email_data.csv")
+photo_counts = data_manipulation.aggregateDataByDate("graph_data/photo_data.csv")
+email_counts = data_manipulation.aggregateDataByDate("graph_data/email_data.csv")
 
 
 app.layout = html.Div([

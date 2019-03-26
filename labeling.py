@@ -8,6 +8,7 @@ Manages all of initial google vision labeling:
 
 import io
 import json
+import os
 
 import multiprocessing
 from multiprocessing.pool import ThreadPool
@@ -33,6 +34,9 @@ photoDataQueue = Queue()
 
 def start_labeling():
     """Gets all the photos and processes them"""
+
+    if not os.path.exists("graph_data/"):
+        os.makedirs("graph_data/")
 
     print("Starting mailbox processing")
     # get all info from gmail processed
@@ -60,7 +64,7 @@ def start_labeling():
     print("]\n")
     print("Finished processing!")
 
-    data_manipulation.createDateCSV(photoDataQueue, "photo_data.csv")
+    data_manipulation.createDateCSV(photoDataQueue, "graph_data/photo_data.csv")
 
 
 def append_to_json(filename, new_json):

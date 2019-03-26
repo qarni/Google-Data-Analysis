@@ -25,7 +25,7 @@ def process_mbox():
     get_all_emails(mb)
 
     # make csv
-    data_manipulation.createDateCSV(emailDataQueue, "email_data.csv")
+    data_manipulation.createDateCSV(emailDataQueue, "graph_data/email_data.csv")
 
 def get_all_attachments(mb):
     """
