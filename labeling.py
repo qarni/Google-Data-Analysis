@@ -133,7 +133,7 @@ def run_google_vision(filename):
         print("mm something went wrong with runnig..")
         pass
 
-    print(".", filename, end=" ", flush=True)
+    print(".", end=" ", flush=True)
 
 
 def printToQueue(filename):
@@ -207,8 +207,6 @@ def update_json_with_label_detection(filename, annotations):
     label_dicts = {'label_annotations': label_dicts}
 
     append_to_json(filename, label_dicts)
-
-    print("ee")
 
 
 def update_json_with_safe_search(filename, annotations):
