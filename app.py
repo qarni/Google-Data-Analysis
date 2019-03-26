@@ -11,7 +11,9 @@ import data_manipulation
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
-counts = data_manipulation.aggregateDataByDate()
+photo_counts = data_manipulation.aggregateDataByDate("photo_data.csv")
+email_counts = data_manipulation.aggregateDataByDate("email_data.csv")
+
 
 app.layout = html.Div([
     
@@ -21,10 +23,8 @@ app.layout = html.Div([
         id='Google Photos Over Time',
         figure={
             'data': [{
-                'x':counts['date'],
-                'y':counts['counts'],
-                'hover_text_list': list(counts['hover_text']),
-                'hoverinfo': 'hover_text_list',
+                'x':photo_counts['date'],
+                'y':photo_counts['counts'],
                 'mode':'lines+markers',
                 'line': {
                     'width': 3
@@ -37,7 +37,29 @@ app.layout = html.Div([
                 title="Google Photos Over Time"
             )
         }
+    ),
+
+    dcc.Graph(
+        id='Gmail Over Time',
+        figure={
+            'data': [{
+                'x':email_counts['date'],
+                'y':email_counts['counts'],
+                'mode':'lines+markers',
+                'line': {
+                    'width': 3
+                }
+            }],
+            'layout': go.Layout(
+                xaxis={'title': 'Date'},
+                yaxis={'title': 'Count per Day'},
+                hovermode='closest', 
+                title="Gmail Over Time"
+            )
+        }
     )
+
+
 ])
 
 if __name__ == "__main__":

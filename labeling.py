@@ -13,6 +13,7 @@ import multiprocessing
 from multiprocessing.pool import ThreadPool
 
 from queue import Queue
+from datetime import datetime
 
 # from pyPDF2 import PdfFileReader
 # Imports the Google Cloud client library
@@ -59,7 +60,7 @@ def start_labeling():
     print("]\n")
     print("Finished processing!")
 
-    data_manipulation.createDateCSV(photoDataQueue)
+    data_manipulation.createDateCSV(photoDataQueue, "photo_data.csv")
 
 
 def append_to_json(filename, new_json):
@@ -154,6 +155,9 @@ def printToQueue(filename):
             if date != 'N/A' and date != '':
                 # currently need: date, filename TODO: add more things here later
                 # TODO: Google drive pics/etc don't have dates... can that be fixed?
+
+                datetimeobject = datetime.strptime(date,'%b %d, %Y')
+                date = datetimeobject.strftime('%Y-%m-%d') 
 
                 new_json_entry = {
                     'date': date,

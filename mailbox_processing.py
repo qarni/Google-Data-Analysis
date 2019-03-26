@@ -5,6 +5,14 @@ from email import header
 from bs4 import BeautifulSoup
 import chardet
 
+from queue import Queue
+from datetime import datetime
+
+import data_manipulation
+
+# Makes a queue for potential threads or just normal input
+emailDataQueue = Queue()
+
 def process_mbox():
     """
     Process mbox file
@@ -15,6 +23,9 @@ def process_mbox():
     mb = mailbox.mbox("Takeout/Mail/All mail Including Spam and Trash.mbox")
     get_all_attachments(mb)
     get_all_emails(mb)
+
+    # make csv
+    data_manipulation.createDateCSV(emailDataQueue, "email_data.csv")
 
 def get_all_attachments(mb):
     """
@@ -54,20 +65,25 @@ def get_all_emails(mb):
     if not os.path.exists(mail_folder):
         os.makedirs(mail_folder)
     
+    counter = 1
     for message in mb:
         try:
             subject = str(header.make_header(header.decode_header(message['subject'])))
         except Exception:
-            subject = ""
-        dest = mail_folder + subject + ".txt"
+            subject = "n/a"
+        dest = mail_folder + str(counter) + ": " + subject + ".txt"
 
         content = get_email_body(message)
+
+        counter += 1
 
         try:
             with open(dest, 'w+') as file:
                 file.write("Date: " + message['Date'] + "\nMailbox:" + message['X-Gmail-Labels'] + "\nFrom: " + message['From'] + 
                     "\nTo: " + message['To'] + "\nSubject: " + subject + "\nText:\n" + str(content))
                 file.close()
+            
+            printToQueue(message, subject)
         except Exception:         # not sure why there is an exception sometimes?
             pass
         
@@ -123,3 +139,26 @@ def get_email_body(message):
             body = content
 
     return body
+
+def printToQueue(message, subject):
+    """writes available data to queue for future use"""
+
+    try:
+        date = message['Date']
+
+        if date != 'N/A' and date != '':
+            date = " ".join(date.split(" ", 4)[:4])
+
+            datetimeobject = datetime.strptime(date,'%a, %d %b %Y')
+            date = datetimeobject.strftime('%Y-%m-%d')  
+
+            new_json_entry = {
+                'date': date,
+                'mailbox': message['X-Gmail-Labels'],
+                'subject': subject
+            }
+            emailDataQueue.put(new_json_entry)
+
+    except Exception:
+        print("something is wrong with the queueing")
+        return
