@@ -12,30 +12,29 @@ external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
 counts = data_manipulation.aggregateDataByDate()
-data = [go.Scatter(x=counts['date'], y=counts['counts'])]
 
+data = [go.Scatter(x=counts['date'], y=counts['counts'])]
 
 app.layout = html.Div([
     
+    html.H1(children='Google Pensieve'),
+
     dcc.Graph(
-        id='life-exp-vs-gdp',
+        id='Google Photos Over Time',
         figure={
-            'data': [
-                go.Scatter(
-                    x=counts['date'],
-                    y=counts['counts'],
-                    mode='markers',
-                    opacity=0.7,
-                    marker={
-                        'size': 15,
-                        'line': {'width': 0.5, 'color': 'white'}
-                    }
-                )
-            ],
+            'data': [{
+                'x':counts['date'],
+                'y':counts['counts'],
+                'mode':'lines+markers',
+                'line': {
+                    'width': 3
+                }
+            }],
             'layout': go.Layout(
                 xaxis={'title': 'Date'},
                 yaxis={'title': 'Count per Day'},
-                hovermode='closest'
+                hovermode='closest', 
+                title="Google Photos Over Time"
             )
         }
     )
@@ -43,5 +42,4 @@ app.layout = html.Div([
 
 
 if __name__ == "__main__":
-    app.run_server(debug=True)   
-#    py.iplot(data, filename = 'time-series-simple')
+    app.run_server(debug=True)
