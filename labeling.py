@@ -22,6 +22,7 @@ from google.cloud.vision import types
 
 import helper
 import mailbox_processing
+import data_manipulation
 
 # Instantiates a client
 CLIENT = vision.ImageAnnotatorClient()
@@ -58,7 +59,7 @@ def start_labeling():
     print("]\n")
     print("Finished processing!")
 
-    createPhotoDateJson()
+    data_manipulation.createDateCSV(photoDataQueue)
 
 
 def append_to_json(filename, new_json):
@@ -163,26 +164,6 @@ def printToQueue(filename):
     except Exception:
         print("something is wrong with the queueing")
         return
-
-
-def createPhotoDateJson():
-    """
-    get everything from the queue and add to one json file
-    TODO: this needs to be in a good format to actually graph... I have the x
-    var, but not ay var. Maybe I can use an aggregation function of some sort? Idk.
-    Work on this next.
-    """
-
-    photo_data_json_filename = "photo_data.json"
-
-    full_json = []
-    while photoDataQueue.qsize():
-        full_json.append(photoDataQueue.get())
-
-    full_json = {'photo_data': full_json}
-
-    with open(photo_data_json_filename, "w") as write:
-        json.dump(full_json, write, indent=2)
 
 
 def run_label_detection(image, filename):
