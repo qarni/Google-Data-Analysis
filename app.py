@@ -13,8 +13,6 @@ app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
 counts = data_manipulation.aggregateDataByDate()
 
-data = [go.Scatter(x=counts['date'], y=counts['counts'])]
-
 app.layout = html.Div([
     
     html.H1(children='Google Pensieve'),
@@ -25,6 +23,8 @@ app.layout = html.Div([
             'data': [{
                 'x':counts['date'],
                 'y':counts['counts'],
+                'hover_text_list': list(counts['hover_text']),
+                'hoverinfo': 'hover_text_list',
                 'mode':'lines+markers',
                 'line': {
                     'width': 3
@@ -39,7 +39,6 @@ app.layout = html.Div([
         }
     )
 ])
-
 
 if __name__ == "__main__":
     app.run_server(debug=True)
