@@ -4,15 +4,19 @@ Manages all of initial google vision labeling:
 - safe search
 - text detection
 - appends/updates to original json
+
+Also calls for email processing
 """
 
 import io
 import json
+import os
 
 import multiprocessing
 from multiprocessing.pool import ThreadPool
 
 from queue import Queue
+from datetime import datetime
 
 # from pyPDF2 import PdfFileReader
 # Imports the Google Cloud client library
@@ -22,6 +26,7 @@ from google.cloud.vision import types
 
 import helper
 import mailbox_processing
+import data_manipulation
 
 # Instantiates a client
 CLIENT = vision.ImageAnnotatorClient()
@@ -30,18 +35,27 @@ CLIENT = vision.ImageAnnotatorClient()
 photoDataQueue = Queue()
 
 def start_labeling():
-    """Gets all the photos and processes them"""
+    """Gets all the emails and photos and processes them"""
 
-    print("Starting mailbox processing")
+    if not os.path.exists("graph_data/"):
+        os.makedirs("graph_data/")
+
     # get all info from gmail processed
     mailbox_processing.process_mbox()
-    print("Finished mailbox processing")
 
-    # Keep a list of all the photos
-    photo_list = helper.get_file_list(helper.PHOTO_EXTENTIONS, helper.PHOTO_FOLDER_LIST)
-
+    # Gets all the photos and processes them
+    process_photos()
+   
+    # TODO THIS DOES NOT WORK CURRENTLY - find a library to process pdfs
+    # only process a file of max 2000 pages 
+    # hopefully this will stop any textbooks from being processed as well
     # Get a list of all the pdfs
-    pdf_list = helper.get_file_list('.pdf', helper.TEXT_FOLDER_LIST)
+    # pdf_list = helper.get_file_list('.pdf', helper.TEXT_FOLDER_LIST)
+
+
+def process_photos():
+     # Keep a list of all the photos
+    photo_list = helper.get_file_list(helper.PHOTO_EXTENTIONS, helper.PHOTO_FOLDER_LIST)
 
     # print a progress bar so we know how many pictures have been processed:
     print("\nTotal pictures to be processed: " + str(len(photo_list)))
@@ -50,16 +64,10 @@ def start_labeling():
     pool = ThreadPool()
     pool.map(run_google_vision, photo_list)
 
-    # TODO THIS DOES NOT WORK CURRENTLY - find a library to process pdfs
-    #for filename in pdf_list:
-    # only process a file of max 2000 pages 
-    # hopefully this will stop any textbooks from being processed as well
-
     print("]\n")
     print("Finished processing!")
 
-    createPhotoDateJson()
-
+    data_manipulation.createDateCSV(photoDataQueue, "graph_data/photo_data.csv")
 
 def append_to_json(filename, new_json):
     """ append this json to the original file
@@ -131,7 +139,7 @@ def run_google_vision(filename):
         print("mm something went wrong with runnig..")
         pass
 
-    print(".", filename, end=" ", flush=True)
+    print(".", end=" ", flush=True)
 
 
 def printToQueue(filename):
@@ -154,6 +162,9 @@ def printToQueue(filename):
                 # currently need: date, filename TODO: add more things here later
                 # TODO: Google drive pics/etc don't have dates... can that be fixed?
 
+                datetimeobject = datetime.strptime(date,'%b %d, %Y')
+                date = datetimeobject.strftime('%Y-%m-%d') 
+
                 new_json_entry = {
                     'date': date,
                     'filename': filename
@@ -163,26 +174,6 @@ def printToQueue(filename):
     except Exception:
         print("something is wrong with the queueing")
         return
-
-
-def createPhotoDateJson():
-    """
-    get everything from the queue and add to one json file
-    TODO: this needs to be in a good format to actually graph... I have the x
-    var, but not ay var. Maybe I can use an aggregation function of some sort? Idk.
-    Work on this next.
-    """
-
-    photo_data_json_filename = "photo_data.json"
-
-    full_json = []
-    while photoDataQueue.qsize():
-        full_json.append(photoDataQueue.get())
-
-    full_json = {'photo_data': full_json}
-
-    with open(photo_data_json_filename, "w") as write:
-        json.dump(full_json, write, indent=2)
 
 
 def run_label_detection(image, filename):
@@ -222,8 +213,6 @@ def update_json_with_label_detection(filename, annotations):
     label_dicts = {'label_annotations': label_dicts}
 
     append_to_json(filename, label_dicts)
-
-    print("ee")
 
 
 def update_json_with_safe_search(filename, annotations):

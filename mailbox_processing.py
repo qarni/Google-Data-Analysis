@@ -5,6 +5,14 @@ from email import header
 from bs4 import BeautifulSoup
 import chardet
 
+from queue import Queue
+from datetime import datetime
+
+import data_manipulation
+
+# Makes a queue for potential threads or just normal input
+emailDataQueue = Queue()
+
 def process_mbox():
     """
     Process mbox file
@@ -12,9 +20,16 @@ def process_mbox():
     Download the emails themselves as text files, and then they can be processed like other files too
     """
 
+    print("Starting mailbox processing")
     mb = mailbox.mbox("Takeout/Mail/All mail Including Spam and Trash.mbox")
-    get_all_attachments(mb)
+    #get_all_attachments(mb)
     get_all_emails(mb)
+
+    # make csv
+    data_manipulation.createDateCSV(emailDataQueue, "graph_data/email_data.csv")
+    data_manipulation.splitEmailCSV()
+
+    print("Finished mailbox processing")
 
 def get_all_attachments(mb):
     """
@@ -54,22 +69,38 @@ def get_all_emails(mb):
     if not os.path.exists(mail_folder):
         os.makedirs(mail_folder)
     
+    counter = 1
     for message in mb:
         try:
             subject = str(header.make_header(header.decode_header(message['subject'])))
         except Exception:
-            subject = ""
-        dest = mail_folder + subject + ".txt"
+            subject = "n/a"
+        dest = mail_folder + str(counter) + "-" + subject + ".txt"
 
         content = get_email_body(message)
+        date = str(message['Date'])
+        mailboxes = str(message['X-Gmail-Labels'])
+        from_e = str(message['From'])
+        to_e = str(message['To'])
 
         try:
             with open(dest, 'w+') as file:
-                file.write("Date: " + message['Date'] + "\nMailbox:" + message['X-Gmail-Labels'] + "\nFrom: " + message['From'] + 
-                    "\nTo: " + message['To'] + "\nSubject: " + subject + "\nText:\n" + str(content))
+                file.write("Date: " + date + "\nMailbox:" + mailboxes + "\nFrom: " + from_e + 
+                    "\nTo: " + to_e + "\nSubject: " + subject + "\nText:\n" + str(content))
                 file.close()
-        except Exception:         # not sure why there is an exception sometimes?
-            pass
+        except Exception:         
+            try:
+                new_dest = mail_folder + str(counter-1) + "-na.txt"
+                with open(new_dest, 'w+') as file:
+                    file.write("Date: " + date + "\nMailbox:" + mailboxes + "\nFrom: " + from_e + 
+                    "\nTo: " + to_e + "\nSubject: " + subject + "\nText:\n" + str(content))
+                file.close()
+            except Exception:    # not sure why there is an exception sometimes?
+                pass
+
+        printToQueue(message, subject)
+
+        counter += 1
         
 def get_email_body(message):
     """
@@ -123,3 +154,52 @@ def get_email_body(message):
             body = content
 
     return body
+
+def printToQueue(message, subject):
+    """writes available data to queue for future use"""
+
+    try:
+        date = message['Date']
+
+        if date != 'N/A' and date != '':
+            
+            # try all the different options
+            try:
+                datetimeobject = datetime.strptime(date,'%a, %d %b %Y %H:%M:%S %z')
+            except Exception:
+                try:
+                    datetimeobject = datetime.strptime(date,'%a, %d %b %Y %H:%M:%S %z (%Z)')
+                except Exception:
+                    try:
+                        datetimeobject = datetime.strptime(date,'%a, %d %b %Y %H:%M:%S %Z')
+                    except Exception:
+                        try:
+                            datetimeobject = datetime.strptime(date,'%a, %d %b %Y %H:%M:%S %z')
+                        except Exception:
+                            try:
+                                datetimeobject = datetime.strptime(date,'%d %b %Y %H:%M:%S %z')
+                            except Exception:
+                                try:
+                                    date = ",".join(date.split(",", 4)[:4])
+                                    datetimeobject = datetime.strptime(date,'%a, %d %b %Y')
+                                except Exception:
+                                    try:
+                                        date = ",".join(date.split(",", 3)[:3])
+                                        datetimeobject = datetime.strptime(date,'%d %b %Y')
+                                    except Exception:
+                                        #print(date)
+                                        return
+
+            date = datetimeobject.strftime('%Y-%m-%d')  
+
+            new_json_entry = {
+                'date': date,
+                'mailbox': message['X-Gmail-Labels'],
+                'subject': subject
+            }
+            emailDataQueue.put(new_json_entry)
+
+    except Exception:
+        #print(date)
+        print("something is wrong with the queueing")
+        return
