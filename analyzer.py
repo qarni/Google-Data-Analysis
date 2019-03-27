@@ -17,6 +17,17 @@ if __name__ == "__main__":
     else:
         print("Okay. Will continue with prior data.")
 
+    res = search.riskSearch()
+    # lists all files that contain the search term
+    print("%d documents found" % len(res))
+    for doc in res:
+        print(doc)
+    print("%d documents found" % len(res))
+
+    with open("risk.txt", "w+") as file:
+        file.write(str(res))
+        file.close()
+
     # start search loop if input is y
     cont_search = input("Would you like to search for any terms? (y/n) ")
 
@@ -26,9 +37,9 @@ if __name__ == "__main__":
         res = search.search(search_term)
 
         # lists all files that contain the search term
-        print("%d documents found" % res['hits']['total'])
-        for doc in res['hits']['hits']:
-            print("%s" % (doc['_id']))
+        print("%d documents found" % len(res))
+        for doc in res:
+            print(doc)
 
         cont_search = input("Would you like to search for any more terms? (y/n) ")
 
