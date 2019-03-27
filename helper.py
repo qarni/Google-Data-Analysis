@@ -7,10 +7,11 @@ import os
 PHOTO_EXTENTIONS = [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp",
                     ".raw", ".ico", ".tif", ".tiff"]
 
-TEXT_EXTENSIONS = [".doc", ".docx", ".odt", ".rtf", ".tex", "wks", 
+TEXT_EXTENSIONS = [".doc", ".docx", ".odt", ".rtf", ".tex", "wks",
                    ".wps", ".wpd", ".txt"]
 
-PHOTO_FOLDER_LIST = ["Takeout/Google Photos", "Takeout/Drive", "Takeout/mail_attachments"]
+PHOTO_FOLDER_LIST = ["Takeout/Google Photos",
+                     "Takeout/Drive", "Takeout/mail_attachments"]
 
 TEXT_FOLDER_LIST = ["Takeout/Drive", "Takeout/mail_attachments"]
 
@@ -32,4 +33,3 @@ def get_file_list(extentions, folder_names):
                     file_list.append(os.path.join(root, filename))
 
     return file_list
-

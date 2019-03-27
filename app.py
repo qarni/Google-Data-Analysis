@@ -8,15 +8,27 @@ import dash_html_components as html
 
 import data_manipulation
 
+# source for stylesheets: plotly website
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
-photo_counts = data_manipulation.aggregateDataByDate("graph_data/photo_data.csv")
-sent_email_counts = data_manipulation.aggregateDataByDate("graph_data/sent_email_data.csv")
-received_email_counts = data_manipulation.aggregateDataByDate("graph_data/received_email_data.csv")
+photo_counts = data_manipulation.aggregateDataByDate(
+    "graph_data/photo_data.csv")
+colorsForPhotos, shapesForPhotos, sizesForPhotos = data_manipulation.createMarkerProperties(
+    photo_counts, "rgba(31, 119, 180, 1)")
+
+sent_email_counts = data_manipulation.aggregateDataByDate(
+    "graph_data/sent_email_data.csv")
+colorsForSent, shapesForSent, sizesForSent = data_manipulation.createMarkerProperties(
+    sent_email_counts, "rgba(31, 119, 180, 1)")
+
+received_email_counts = data_manipulation.aggregateDataByDate(
+    "graph_data/received_email_data.csv")
+colorsForReceived, shapesForReceived, sizesForReceived = data_manipulation.createMarkerProperties(
+    received_email_counts, "rgba(255, 127, 14, 1)")
 
 app.layout = html.Div([
-    
+
     html.H1(children='Google Pensieve'),
 
     dcc.Graph(
@@ -28,12 +40,21 @@ app.layout = html.Div([
                 'mode': 'lines+markers',
                 'line': {
                     'width': 1
+                },
+                'marker': {
+                    'color': colorsForPhotos,
+                    'symbol': shapesForPhotos,
+                    'size': sizesForPhotos,
+                    'opacity': .8,
+                    'line': {
+                        'width': .2
+                    }
                 }
             }],
             'layout': go.Layout(
                 xaxis={'title': 'Date'},
                 yaxis={'title': 'Number of Photos'},
-                hovermode='closest', 
+                hovermode='closest',
                 title="Google Photos Over Time"
             )
         }
@@ -49,21 +70,39 @@ app.layout = html.Div([
                 'mode': 'lines+markers',
                 'line': {
                     'width': 1
+                },
+                'marker': {
+                    'color': colorsForSent,
+                    'symbol': shapesForSent,
+                    'size': sizesForSent,
+                    'opacity': .8,
+                    'line': {
+                        'width': .2
+                    }
                 }
-            }, 
-            {
+            },
+                {
                 'x': received_email_counts['date'],
                 'y': received_email_counts['counts'],
                 'name': 'Received Emails',
                 'mode':'lines+markers',
                 'line': {
                     'width': 1
+                },
+                'marker': {
+                    'color': colorsForReceived,
+                    'symbol': shapesForReceived,
+                    'size': sizesForReceived,
+                    'opacity': .8,
+                    'line': {
+                        'width': .2
+                    }
                 }
             }],
             'layout': go.Layout(
                 xaxis={'title': 'Date'},
                 yaxis={'title': 'Number of Emails'},
-                hovermode='closest', 
+                hovermode='closest',
                 title="Gmail Over Time"
             )
         }

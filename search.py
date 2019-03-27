@@ -74,7 +74,8 @@ def search(search_term):
     Returns list of results
     """
 
-    page = es.search(index=['photo_jsons', 'text_jsons'], q=search_term, scroll = '2m', size = 1000)
+    page = es.search(index=['photo_jsons', 'text_jsons'],
+                     q=search_term, scroll='2m', size=1000)
     return getAllResults(page)
 
 
@@ -85,13 +86,15 @@ def riskSearch():
     TODO: make it so that it must match a term exactly... currently it is only matching on one in a multi-word term
     """
 
-    risk_list = ["password", "bank", "SSN", "VERY_LIKELY"] 
+    risk_list = ["password", "bank", "SSN", "VERY_LIKELY"]
     # I can't search with the colons/quotes... see if there's anything i can do about that
-    others = ["\"adult\": \"VERY_LIKELY\"","\"adult\": \"LIKELY\"", "\"racy\": \"VERY_LIKELY\"", "\"racy\": \"LIKELY\""]
+    others = ["\"adult\": \"VERY_LIKELY\"", "\"adult\": \"LIKELY\"",
+              "\"racy\": \"VERY_LIKELY\"", "\"racy\": \"LIKELY\""]
 
-    page = es.search(index=['photo_jsons', 'text_jsons'], q=risk_list, scroll = '2m', size = 1000)
+    page = es.search(index=['photo_jsons', 'text_jsons'],
+                     q=risk_list, scroll='2m', size=1000)
     return getAllResults(page)
-    
+
 
 def getAllResults(page):
     """
@@ -118,6 +121,6 @@ def getAllResults(page):
 
         # Update the scroll ID
         sid = page['_scroll_id']
-        page = es.scroll(scroll_id = sid, scroll = '2m')
+        page = es.scroll(scroll_id=sid, scroll='2m')
 
     return res

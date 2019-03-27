@@ -2,10 +2,15 @@ import csv
 import json
 
 import pandas as pd
+import numpy as np
 
-date_group = []
+import search
+
 
 def createDateCSV(dataQueue, csvFilename):
+    """
+    Converts the given dataQueue with json vars into a csv file
+    """
 
     full_json_list = []
     while dataQueue.qsize():
@@ -19,40 +24,114 @@ def createDateCSV(dataQueue, csvFilename):
         for item in full_json_list:
             writer.writerow(item)
 
+
+def addColumnForFlags(counts):
+    """
+    adds/updates the flags column in a given counts panda data frame based on if the filenames
+    from that day are in the risk list provided from elastic search
+
+    TODO: once a user can create their own flag list, pass it through here to search
+
+    Returns @counts
+    """
+
+    risk_list = search.riskSearch()
+
+    def risk(row):
+        for filename in risk_list:
+            # remove the .json at the end of the filename
+            filename = str(filename[:-len(".json")])
+            if filename in row[2]:
+                return "true"
+        return "false"
+
+    counts['risk'] = counts.apply(risk, axis=1)
+    counts.to_csv("graph_data/test.csv", index=False)
+    return counts
+
+
 def splitEmailCSV():
+    """
+    Split the full email csv file into sent and received email csv files
+    Saves the new csvs
+    """
+
     origEmailCSV = "graph_data/email_data.csv"
     sentEmailCSV = "graph_data/sent_email_data.csv"
     receivedEmailCSV = "graph_data/received_email_data.csv"
 
     origEmail = pd.read_csv(origEmailCSV)
 
-    sentEmail = origEmail.loc[origEmail['mailbox'].str.contains("Sent")==True]
-    receivedEmail = origEmail.loc[origEmail['mailbox'].str.contains("Sent")==False]
+    sentEmail = origEmail.loc[origEmail['mailbox'].str.contains(
+        "Sent") == True]
+    receivedEmail = origEmail.loc[origEmail['mailbox'].str.contains(
+        "Sent") == False]
 
     sentEmail.to_csv(sentEmailCSV, index=False)
     receivedEmail.to_csv(receivedEmailCSV, index=False)
 
-def getHoverText(row):
-    filenames = list(date_group['filename'].get_group(row[0]))
-    filenames = ", ".join(str(name) for name in filenames)
-    final_text = "Count: " + str(row[1]) + "\n Files:\n" + filenames
-    return final_text
 
 def aggregateDataByDate(filename):
-    global date_group
+    """
+    Reads a csv file and turns it into a panda data frame
+    Then aggregares the data and groups it by date, with a count for each date
+    Also adds the hover text, which contains the names of all files for that date 
+    that were included in the csv
+
+    Returns @counts
+    """
 
     data = pd.read_csv(filename)
-
     date_group = data.groupby('date')
+
+    def getHoverText(row):
+        filenames = list(date_group['filename'].get_group(row[0]))
+        filenames = ", ".join(str(name) for name in filenames)
+        final_text = "Count: " + str(row[1]) + "\n Files:\n" + filenames
+        return final_text
 
     counts = data['date'].value_counts()
     counts = counts.rename_axis('date').reset_index(name='counts')
-    #counts['hover_text'] = counts.apply(getHoverText, axis=1)
-    counts = counts.sort_values(by = ['date'])
+    counts['hover_text'] = counts.apply(getHoverText, axis=1)
+    counts = counts.sort_values(by=['date'])
+
+    counts = addColumnForFlags(counts)
 
     return counts
 
+
+def createMarkerProperties(counts, main_color):
+    """
+    Creates lists of marker properties based on if that row is a "risk" row or not
+    """
+
+    riskColor = "rgba(255, 0, 0, 1)"
+
+    defaultShape = "circle"
+    riskShape = "star-dot"
+
+    defaultSize = 8
+    riskSize = 10
+
+    colors = []
+    shapes = []
+    sizes = []
+
+    for index, row in counts.iterrows():
+        if str(row['risk']) == "true":
+            colors.append(riskColor)
+            shapes.append(riskShape)
+            sizes.append(riskSize)
+        else:
+            colors.append(main_color)
+            shapes.append(defaultShape)
+            sizes.append(defaultSize)
+    return colors, shapes, sizes
+
+
 def test_getJsonListAgain():
+    """This was just for testing/debugging"""
+
     photo_data_json_filename = "photo_data.json"
     with open(photo_data_json_filename) as read:
         orig = json.load(read)

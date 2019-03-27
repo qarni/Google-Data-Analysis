@@ -9,7 +9,8 @@ if __name__ == "__main__":
 
     print("\nGoogle Photos Analyzer\n")
 
-    label = input("Have you updated your Google Takeout files for analysis? (y/n) ")
+    label = input(
+        "Have you updated your Google Takeout files for analysis? (y/n) ")
     if label is "y":
         print("Okiedokes. Time to reanalyze.")
         labeling.start_labeling()
@@ -22,7 +23,6 @@ if __name__ == "__main__":
     print("%d documents found" % len(res))
     for doc in res:
         print(doc)
-    print("%d documents found" % len(res))
 
     with open("risk.txt", "w+") as file:
         file.write(str(res))
@@ -41,6 +41,7 @@ if __name__ == "__main__":
         for doc in res:
             print(doc)
 
-        cont_search = input("Would you like to search for any more terms? (y/n) ")
+        cont_search = input(
+            "Would you like to search for any more terms? (y/n) ")
 
     print("Goodbye!")

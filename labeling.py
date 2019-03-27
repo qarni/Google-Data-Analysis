@@ -31,8 +31,9 @@ import data_manipulation
 # Instantiates a client
 CLIENT = vision.ImageAnnotatorClient()
 
-# Makes a queue for the threads 
+# Makes a queue for the threads
 photoDataQueue = Queue()
+
 
 def start_labeling():
     """Gets all the emails and photos and processes them"""
@@ -45,9 +46,9 @@ def start_labeling():
 
     # Gets all the photos and processes them
     process_photos()
-   
+
     # TODO THIS DOES NOT WORK CURRENTLY - find a library to process pdfs
-    # only process a file of max 2000 pages 
+    # only process a file of max 2000 pages
     # hopefully this will stop any textbooks from being processed as well
     # Get a list of all the pdfs
     # pdf_list = helper.get_file_list('.pdf', helper.TEXT_FOLDER_LIST)
@@ -55,7 +56,8 @@ def start_labeling():
 
 def process_photos():
      # Keep a list of all the photos
-    photo_list = helper.get_file_list(helper.PHOTO_EXTENTIONS, helper.PHOTO_FOLDER_LIST)
+    photo_list = helper.get_file_list(
+        helper.PHOTO_EXTENTIONS, helper.PHOTO_FOLDER_LIST)
 
     # print a progress bar so we know how many pictures have been processed:
     print("\nTotal pictures to be processed: " + str(len(photo_list)))
@@ -67,7 +69,9 @@ def process_photos():
     print("]\n")
     print("Finished processing!")
 
-    data_manipulation.createDateCSV(photoDataQueue, "graph_data/photo_data.csv")
+    data_manipulation.createDateCSV(
+        photoDataQueue, "graph_data/photo_data.csv")
+
 
 def append_to_json(filename, new_json):
     """ append this json to the original file
@@ -82,26 +86,26 @@ def append_to_json(filename, new_json):
             'modificationTime': {
                 'timestamp': 'N/A',
                 'formatted': 'N/A'
-                },
+            },
             'geoData': {
                 'latitude': 0.0,
                 'longitude': 0.0,
                 'altitude': 0.0,
                 'latitudeSpan': 0.0,
                 'longitudeSpan': 0.0
-                },
+            },
             'geoDataExif': {
                 'latitude': 0.0,
                 'longitude': 0.0,
                 'altitude': 0.0,
                 'latitudeSpan': 0.0,
                 'longitudeSpan': 0.0
-                },
+            },
             'photoTakenTime': {
                 'timestamp': 'N/A',
                 'formatted': 'N/A'
-                }
             }
+        }
     else:
         new_file_data = {'title': filename}
 
@@ -121,7 +125,7 @@ def append_to_json(filename, new_json):
 
 def run_google_vision(filename):
     """Opens image as a google vision image type"""
-    
+
     try:
         # Loads the image into memory
         with io.open(filename, 'rb') as image_file:
@@ -156,14 +160,14 @@ def printToQueue(filename):
             # date is spliced to only include date, not time
             date = ",".join(date.split(",", 2)[:2])
 
-            # if the data is available, then add it to the photo dates json 
+            # if the data is available, then add it to the photo dates json
             # otherwise - do not add to file (but it can still be found from elasticsearch)
             if date != 'N/A' and date != '':
                 # currently need: date, filename TODO: add more things here later
                 # TODO: Google drive pics/etc don't have dates... can that be fixed?
 
-                datetimeobject = datetime.strptime(date,'%b %d, %Y')
-                date = datetimeobject.strftime('%Y-%m-%d') 
+                datetimeobject = datetime.strptime(date, '%b %d, %Y')
+                date = datetimeobject.strftime('%Y-%m-%d')
 
                 new_json_entry = {
                     'date': date,
@@ -222,7 +226,6 @@ def update_json_with_safe_search(filename, annotations):
     likelihood_name = ('UNKNOWN', 'VERY_UNLIKELY', 'UNLIKELY',
                        'POSSIBLE', 'LIKELY', 'VERY_LIKELY')
 
-
     safe_annot = {'adult': likelihood_name[annotations.adult], 'spoof':
                   likelihood_name[annotations.spoof], 'medical':
                   likelihood_name[annotations.medical], 'violence':
@@ -241,9 +244,11 @@ def update_json_with_document_text_detection(filename, annotations):
         for block in page.blocks:
             for paragraph in block.paragraphs:
                 for word in paragraph.words:
-                    word_text = ''.join([symbol.text for symbol in word.symbols])
+                    word_text = ''.join(
+                        [symbol.text for symbol in word.symbols])
 
-                    word_dict = {'word': word_text, 'confidence': word.confidence}
+                    word_dict = {'word': word_text,
+                                 'confidence': word.confidence}
                     doc_annot.append(word_dict)
 
     doc_annot = {'document_text_annotation': doc_annot}
