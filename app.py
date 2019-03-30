@@ -7,7 +7,8 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
 
-import data_manipulation, search
+import data_manipulation
+import search
 
 # source for stylesheets: plotly website
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
@@ -27,6 +28,16 @@ received_email_counts = data_manipulation.aggregateDataByDate(
     "graph_data/received_email_data.csv")
 colorsForReceived, shapesForReceived, sizesForReceived = data_manipulation.createMarkerProperties(
     received_email_counts, "rgba(255, 127, 14, 1)")
+
+visits_counts = data_manipulation.aggregateDataByDate(
+    "graph_data/visit_data.csv")
+colorsForVisits, shapesForVisits, sizesForVisits = data_manipulation.createMarkerProperties(
+    visits_counts, "rgba(31, 119, 180, 1)")
+
+search_counts = data_manipulation.aggregateDataByDate(
+    "graph_data/search_data.csv")
+colorsForSearch, shapesForSearch, sizesForSearch = data_manipulation.createMarkerProperties(
+    search_counts, "rgba(255, 127, 14, 1)")
 
 app.layout = html.Div([
 
@@ -109,6 +120,55 @@ app.layout = html.Div([
         }
     ),
 
+    dcc.Graph(
+        id='Google Searches/Visits Over Time',
+        figure={
+            'data': [{
+                'x': visits_counts['date'],
+                'y': visits_counts['counts'],
+                'name': 'Site Visits Directly from Google',
+                'mode': 'lines+markers',
+                'line': {
+                    'width': 1
+                },
+                'marker': {
+                    'color': colorsForVisits,
+                    'symbol': shapesForVisits,
+                    'size': sizesForVisits,
+                    'opacity': .8,
+                    'line': {
+                        'width': .2
+                    }
+                }
+            },
+            {
+                'x': search_counts['date'],
+                'y': search_counts['counts'],
+                'name': 'Searches',
+                'mode': 'lines+markers',
+                'line': {
+                    'width': 1,
+                    'color': "rgba(255, 127, 14, 1)"
+                },
+                'marker': {
+                    'color': colorsForSearch,
+                    'symbol': shapesForSearch,
+                    'size': sizesForSearch,
+                    'opacity': .8,
+                    'line': {
+                        'width': .2
+                    }
+                }
+            }],
+            'layout': go.Layout(
+                xaxis={'title': 'Date'},
+                yaxis={'title': 'Number of Interactions'},
+                hovermode='closest',
+                title="Google Searches/Visits Over Time"
+            )
+        }
+    ),
+
     dcc.Dropdown(
         id='dropdown',
         options=[
@@ -123,15 +183,15 @@ app.layout = html.Div([
     html.Div(id='output-container')
 ])
 
+
 @app.callback(
     dash.dependencies.Output('output-container', 'children'),
     [dash.dependencies.Input('dropdown', 'value')])
-
 def update_output(value):
     # TODO: actually take these values, convert them to a list, and sent to risk search
     # TODO: once all this is working, the graphs will also all have to be updated with callbacks
-    
-    #return 'You have selected "{}"'.format(value)
+
+    # return 'You have selected "{}"'.format(value)
     return str(search.riskSearch(value))
 
 

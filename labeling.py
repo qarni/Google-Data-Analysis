@@ -25,6 +25,7 @@ from google.cloud import vision
 from google.cloud.vision import types
 
 import helper
+import html_parse
 import mailbox_processing
 import data_manipulation
 
@@ -40,6 +41,9 @@ def start_labeling():
 
     if not os.path.exists("graph_data/"):
         os.makedirs("graph_data/")
+
+    # process searches, visits, youtube
+    html_parse.parse_search()
 
     # get all info from gmail processed
     mailbox_processing.process_mbox()
