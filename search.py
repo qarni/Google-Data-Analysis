@@ -79,14 +79,14 @@ def search(search_term):
     return getAllResults(page)
 
 
-def riskSearch():
+def riskSearch(risk_list):
     """
     Bulk searches for a list of risk terms
     TODO: make this list more expansive
     TODO: make it so that it must match a term exactly... currently it is only matching on one in a multi-word term
     """
 
-    risk_list = ["password", "bank", "SSN", "VERY_LIKELY"]
+    #risk_list = ["password", "bank", "SSN", "VERY_LIKELY"]
     # I can't search with the colons/quotes... see if there's anything i can do about that
     others = ["\"adult\": \"VERY_LIKELY\"", "\"adult\": \"LIKELY\"",
               "\"racy\": \"VERY_LIKELY\"", "\"racy\": \"LIKELY\""]

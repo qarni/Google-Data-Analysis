@@ -34,8 +34,10 @@ def addColumnForFlags(counts):
 
     Returns @counts
     """
+    #TODO: get this from app.py later
+    risk_list = ["password", "bank", "SSN", "VERY_LIKELY"]
 
-    risk_list = search.riskSearch()
+    risk_list = search.riskSearch(risk_list)
 
     def risk(row):
         for filename in risk_list:

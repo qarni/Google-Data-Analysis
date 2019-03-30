@@ -5,8 +5,9 @@ import plotly.graph_objs as go
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
+from dash.dependencies import Input, Output, State
 
-import data_manipulation
+import data_manipulation, search
 
 # source for stylesheets: plotly website
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
@@ -106,8 +107,33 @@ app.layout = html.Div([
                 title="Gmail Over Time"
             )
         }
-    )
+    ),
+
+    dcc.Dropdown(
+        id='dropdown',
+        options=[
+            {'label': 'password', 'value': 'password'},
+            {'label': 'bank', 'value': 'bank'},
+            {'label': 'SSN', 'value': 'SSN'},
+            {'label': 'VERY_LIKELY', 'value': 'VERY_LIKELY'}
+        ],
+        value=['password', 'bank', 'SSN'],
+        multi=True
+    ),
+    html.Div(id='output-container')
 ])
+
+@app.callback(
+    dash.dependencies.Output('output-container', 'children'),
+    [dash.dependencies.Input('dropdown', 'value')])
+
+def update_output(value):
+    # TODO: actually take these values, convert them to a list, and sent to risk search
+    # TODO: once all this is working, the graphs will also all have to be updated with callbacks
+    
+    #return 'You have selected "{}"'.format(value)
+    return str(search.riskSearch(value))
+
 
 if __name__ == "__main__":
     app.run_server(debug=True)
