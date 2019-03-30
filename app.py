@@ -39,6 +39,16 @@ search_counts = data_manipulation.aggregateDataByDate(
 colorsForSearch, shapesForSearch, sizesForSearch = data_manipulation.createMarkerProperties(
     search_counts, "rgba(255, 127, 14, 1)")
 
+youtube_search_counts = data_manipulation.aggregateDataByDate(
+    "graph_data/youtube_search_data.csv")
+colorsForYoutubeSearch, shapesForYoutubeSearch, sizesForYoutubeSearch = data_manipulation.createMarkerProperties(
+    visits_counts, "rgba(31, 119, 180, 1)")
+
+youtube_watch_counts = data_manipulation.aggregateDataByDate(
+    "graph_data/youtube_watched_data.csv")
+colorsForYoutubeWatch, shapesForYoutubeWatch, sizesForYoutubeWatch = data_manipulation.createMarkerProperties(
+    visits_counts, "rgba(255, 127, 14, 1)")
+
 app.layout = html.Div([
 
     html.H1(children='Google Pensieve'),
@@ -165,6 +175,55 @@ app.layout = html.Div([
                 yaxis={'title': 'Number of Interactions'},
                 hovermode='closest',
                 title="Google Searches/Visits Over Time"
+            )
+        }
+    ),
+
+    dcc.Graph(
+        id='YouTube Searches/Watches Over Time',
+        figure={
+            'data': [{
+                'x': youtube_search_counts['date'],
+                'y': youtube_search_counts['counts'],
+                'name': 'YouTube Searches',
+                'mode': 'lines+markers',
+                'line': {
+                    'width': 1
+                },
+                'marker': {
+                    'color': colorsForYoutubeSearch,
+                    'symbol': shapesForYoutubeSearch,
+                    'size': sizesForYoutubeSearch,
+                    'opacity': .8,
+                    'line': {
+                        'width': .2
+                    }
+                }
+            },
+            {
+                'x': youtube_watch_counts['date'],
+                'y': youtube_watch_counts['counts'],
+                'name': 'YouTube Video Watches',
+                'mode': 'lines+markers',
+                'line': {
+                    'width': 1,
+                    'color': "rgba(255, 127, 14, 1)"
+                },
+                'marker': {
+                    'color': colorsForYoutubeWatch,
+                    'symbol': shapesForYoutubeWatch,
+                    'size': sizesForYoutubeWatch,
+                    'opacity': .8,
+                    'line': {
+                        'width': .2
+                    }
+                }
+            }],
+            'layout': go.Layout(
+                xaxis={'title': 'Date'},
+                yaxis={'title': 'Number of Interactions'},
+                hovermode='closest',
+                title="YouTube Searches/Watches Over Time"
             )
         }
     ),

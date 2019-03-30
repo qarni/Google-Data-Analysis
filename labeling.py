@@ -44,6 +44,7 @@ def start_labeling():
 
     # process searches, visits, youtube
     html_parse.parse_search()
+    html_parse.parse_youtube()
 
     # get all info from gmail processed
     mailbox_processing.process_mbox()
