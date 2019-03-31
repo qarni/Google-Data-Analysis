@@ -8,6 +8,7 @@ def parse_search():
 
     visitsDataQueue = Queue()
     searchesDataQueue = Queue()
+    all_search_data = []
 
     class_for_content = "content-cell mdl-cell mdl-cell--6-col mdl-typography--body-1"
 
@@ -46,6 +47,8 @@ def parse_search():
                 visitsDataQueue.put(new_json_entry)
             elif "Searched for" in category:
                 searchesDataQueue.put(new_json_entry)
+            
+            all_search_data.append(new_json_entry)
 
         except Exception:
             print(date)
@@ -55,10 +58,12 @@ def parse_search():
     data_manipulation.createDateCSV(visitsDataQueue, "graph_data/visit_data.csv")
     data_manipulation.createDateCSV(searchesDataQueue, "graph_data/search_data.csv")
 
+    return all_search_data
 
 def parse_youtube():
     searchesDataQueue = Queue()
     watchedDataQueue = Queue()
+    all_youtube_data = []
 
     class_for_content = "content-cell mdl-cell mdl-cell--6-col mdl-typography--body-1"
 
@@ -104,6 +109,8 @@ def parse_youtube():
             elif "Searched for" in category:
                 searchesDataQueue.put(new_json_entry)
 
+            all_youtube_data.append(new_json_entry)
+
         except Exception:
             print(date)
             pass
@@ -111,3 +118,5 @@ def parse_youtube():
     # print as csv
     data_manipulation.createDateCSV(watchedDataQueue, "graph_data/youtube_watched_data.csv")
     data_manipulation.createDateCSV(searchesDataQueue, "graph_data/youtube_search_data.csv")
+
+    return all_youtube_data

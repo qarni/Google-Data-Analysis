@@ -13,7 +13,7 @@ import helper
 es = Elasticsearch()
 
 
-def upload_json():
+def upload_json(all_search_data, all_youtube_data):
     """
     Removes previous json files from elastic search
     Gets list of all current jsons and uploads them to elastic search
@@ -23,15 +23,21 @@ def upload_json():
 
     # remove previous json files in case there's been an update to them for some
     # reason... this would probably only really happen in testing circumstances
+    
     try:
         es.indices.delete(index='photo_jsons')
         es.indices.delete(index='text_jsons')
+        es.indices.delete(index='search_jsons')
+        es.indices.delete(index='youtube_jsons')
     except Exception:
         pass
+    
 
     # upload all current json files
     index_photos()
     index_text_files()
+    index_search(all_search_data)
+    index_youtube(all_youtube_data)
 
 
 def index_photos():
@@ -66,6 +72,24 @@ def index_text_files():
         except Exception:
             pass
 
+def index_search(search_list):
+    for data in search_list:
+        try:
+            docket_content = {'filename': data['content'], 'doc_text': data}
+            es.index(index='search_jsons', ignore=400, doc_type='html',
+                     id=data['content'], body=json.dumps(docket_content))
+        except Exception:
+            pass
+
+def index_youtube(youtube_list):
+    for data in youtube_list:
+        try:
+            docket_content = {'filename': data['content'], 'doc_text': data}
+            es.index(index='youtube_jsons', ignore=400, doc_type='html',
+                     id=data['content'], body=json.dumps(docket_content))
+        except Exception:
+            pass
+
 
 def search(search_term):
     """
@@ -74,7 +98,7 @@ def search(search_term):
     Returns list of results
     """
 
-    page = es.search(index=['photo_jsons', 'text_jsons'],
+    page = es.search(index=['photo_jsons', 'text_jsons', 'search_jsons', 'youtube_jsons'],
                      q=search_term, scroll='2m', size=1000)
     return getAllResults(page)
 
@@ -91,7 +115,7 @@ def riskSearch(risk_list):
     others = ["\"adult\": \"VERY_LIKELY\"", "\"adult\": \"LIKELY\"",
               "\"racy\": \"VERY_LIKELY\"", "\"racy\": \"LIKELY\""]
 
-    page = es.search(index=['photo_jsons', 'text_jsons'],
+    page = es.search(index=['photo_jsons', 'text_jsons', 'search_jsons', 'youtube_jsons'],
                      q=risk_list, scroll='2m', size=1000)
     return getAllResults(page)
 

@@ -28,6 +28,7 @@ import helper
 import html_parse
 import mailbox_processing
 import data_manipulation
+import search
 
 # Instantiates a client
 CLIENT = vision.ImageAnnotatorClient()
@@ -43,8 +44,8 @@ def start_labeling():
         os.makedirs("graph_data/")
 
     # process searches, visits, youtube
-    html_parse.parse_search()
-    html_parse.parse_youtube()
+    all_search_data = html_parse.parse_search()
+    all_youtube_data = html_parse.parse_youtube()
 
     # get all info from gmail processed
     mailbox_processing.process_mbox()
@@ -57,6 +58,8 @@ def start_labeling():
     # hopefully this will stop any textbooks from being processed as well
     # Get a list of all the pdfs
     # pdf_list = helper.get_file_list('.pdf', helper.TEXT_FOLDER_LIST)
+
+    search.upload_json(all_search_data, all_youtube_data)
 
 
 def process_photos():

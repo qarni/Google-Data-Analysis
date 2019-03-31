@@ -41,8 +41,17 @@ def addColumnForFlags(counts):
 
     def risk(row):
         for filename in risk_list:
-            # remove the .json at the end of the filename
-            filename = str(filename[:-len(".json")])
+            
+            # if it is a json
+            if filename[0] == "{":
+                filename = filename.split(":")
+                filename = filename[len(filename)-1]
+                filename = filename.split("'")
+                filename = filename[1]
+            else:
+                # if it is a filename
+                # remove the .json at the end of the filename
+                filename = str(filename[:-len(".json")])
             if filename in row[2]:
                 return "true"
         return "false"
