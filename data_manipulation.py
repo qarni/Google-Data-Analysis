@@ -116,7 +116,7 @@ def createMarkerProperties(counts, main_color):
     Creates lists of marker properties based on if that row is a "risk" row or not
     """
 
-    riskColor = "rgba(255, 0, 0, 1)"
+    riskColor = "rgba(238, 16, 16, 1)"
 
     defaultShape = "circle"
     riskShape = "star-dot"
