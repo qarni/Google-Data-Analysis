@@ -10,6 +10,10 @@ from dash.dependencies import Input, Output, State
 import data_manipulation
 import search
 
+# colors for graphs
+COLOR_1 = "rgba(1, 94, 186, 1)"   # blue
+COLOR_2 = "rgba(114, 196, 114, 1)"   # green
+
 # source for stylesheets: plotly website
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
@@ -17,37 +21,37 @@ app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 photo_counts = data_manipulation.aggregateDataByDate(
     "graph_data/photo_data.csv")
 colorsForPhotos, shapesForPhotos, sizesForPhotos = data_manipulation.createMarkerProperties(
-    photo_counts, "rgba(31, 119, 180, 1)")
+    photo_counts, COLOR_1)
 
 sent_email_counts = data_manipulation.aggregateDataByDate(
     "graph_data/sent_email_data.csv")
 colorsForSent, shapesForSent, sizesForSent = data_manipulation.createMarkerProperties(
-    sent_email_counts, "rgba(31, 119, 180, 1)")
+    sent_email_counts, COLOR_1)
 
 received_email_counts = data_manipulation.aggregateDataByDate(
     "graph_data/received_email_data.csv")
 colorsForReceived, shapesForReceived, sizesForReceived = data_manipulation.createMarkerProperties(
-    received_email_counts, "rgba(255, 127, 14, 1)")
+    received_email_counts, COLOR_2)
 
 visits_counts = data_manipulation.aggregateDataByDate(
     "graph_data/visit_data.csv")
 colorsForVisits, shapesForVisits, sizesForVisits = data_manipulation.createMarkerProperties(
-    visits_counts, "rgba(31, 119, 180, 1)")
+    visits_counts, COLOR_1)
 
 search_counts = data_manipulation.aggregateDataByDate(
     "graph_data/search_data.csv")
 colorsForSearch, shapesForSearch, sizesForSearch = data_manipulation.createMarkerProperties(
-    search_counts, "rgba(255, 127, 14, 1)")
+    search_counts, COLOR_2)
 
 youtube_search_counts = data_manipulation.aggregateDataByDate(
     "graph_data/youtube_search_data.csv")
 colorsForYoutubeSearch, shapesForYoutubeSearch, sizesForYoutubeSearch = data_manipulation.createMarkerProperties(
-    visits_counts, "rgba(31, 119, 180, 1)")
+    visits_counts, COLOR_1)
 
 youtube_watch_counts = data_manipulation.aggregateDataByDate(
     "graph_data/youtube_watched_data.csv")
 colorsForYoutubeWatch, shapesForYoutubeWatch, sizesForYoutubeWatch = data_manipulation.createMarkerProperties(
-    visits_counts, "rgba(255, 127, 14, 1)")
+    visits_counts, COLOR_2)
 
 app.layout = html.Div([
 
@@ -109,7 +113,8 @@ app.layout = html.Div([
                 'name': 'Received Emails',
                 'mode':'lines+markers',
                 'line': {
-                    'width': 1
+                    'width': 1,
+                    'color': COLOR_2
                 },
                 'marker': {
                     'color': colorsForReceived,
@@ -158,7 +163,7 @@ app.layout = html.Div([
                 'mode': 'lines+markers',
                 'line': {
                     'width': 1,
-                    'color': "rgba(255, 127, 14, 1)"
+                    'color': COLOR_2
                 },
                 'marker': {
                     'color': colorsForSearch,
@@ -207,7 +212,7 @@ app.layout = html.Div([
                 'mode': 'lines+markers',
                 'line': {
                     'width': 1,
-                    'color': "rgba(255, 127, 14, 1)"
+                    'color': COLOR_2
                 },
                 'marker': {
                     'color': colorsForYoutubeWatch,
