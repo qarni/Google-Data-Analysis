@@ -1,5 +1,6 @@
 import csv
 import json
+from datetime import datetime
 
 import pandas as pd
 import numpy as np
@@ -57,7 +58,7 @@ def addColumnForFlags(counts):
         return "false"
 
     counts['risk'] = counts.apply(risk, axis=1)
-    counts.to_csv("graph_data/test.csv", index=False)
+
     return counts
 
 
@@ -96,9 +97,16 @@ def aggregateDataByDate(filename):
     date_group = data.groupby('date')
 
     def getHoverText(row):
-        filenames = list(date_group['filename'].get_group(row[0]))
-        filenames = ", ".join(str(name) for name in filenames)
-        final_text = "Count: " + str(row[1]) + "\n Files:\n" + filenames
+        try:
+            # can only show max 24 things... i think
+            datetimeobject = datetime.strptime(row[0], '%Y-%m-%d')
+            date = datetimeobject.strftime('%b %d')
+
+            filenames = list(date_group['filename'].get_group(row[0]))[0:23]
+            filenames = ", <br>".join(str(name) for name in filenames)
+            final_text = "Date: " + str(date) + " Count: " + str(row[1]) + "<br>Files:<br>" + filenames
+        except:
+            return "Date: " + str(date) + " Count: " + str(row[1]) 
         return final_text
 
     counts = data['date'].value_counts()
@@ -107,6 +115,8 @@ def aggregateDataByDate(filename):
     counts = counts.sort_values(by=['date'])
 
     counts = addColumnForFlags(counts)
+
+    counts.to_csv(filename+"pd.csv")
 
     return counts
 

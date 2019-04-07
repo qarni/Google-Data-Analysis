@@ -63,6 +63,8 @@ app.layout = html.Div([
             'data': [{
                 'x': photo_counts['date'],
                 'y': photo_counts['counts'],
+                'text': photo_counts['hover_text'],
+                'hoverinfo': 'text',
                 'mode': 'lines+markers',
                 'line': {
                     'width': 1
@@ -92,6 +94,8 @@ app.layout = html.Div([
             'data': [{
                 'x': sent_email_counts['date'],
                 'y': sent_email_counts['counts'],
+                'text': sent_email_counts['hover_text'],
+                'hoverinfo': 'text',
                 'name': 'Sent Emails',
                 'mode': 'lines+markers',
                 'line': {
@@ -110,6 +114,8 @@ app.layout = html.Div([
                 {
                 'x': received_email_counts['date'],
                 'y': received_email_counts['counts'],
+                'text': received_email_counts['hover_text'],
+                'hoverinfo': 'text',
                 'name': 'Received Emails',
                 'mode':'lines+markers',
                 'line': {
@@ -141,6 +147,8 @@ app.layout = html.Div([
             'data': [{
                 'x': visits_counts['date'],
                 'y': visits_counts['counts'],
+                'text': visits_counts['hover_text'],
+                'hoverinfo': 'text',
                 'name': 'Site Visits Directly from Google',
                 'mode': 'lines+markers',
                 'line': {
@@ -159,6 +167,8 @@ app.layout = html.Div([
             {
                 'x': search_counts['date'],
                 'y': search_counts['counts'],
+                'text': search_counts['hover_text'],
+                'hoverinfo': 'text',
                 'name': 'Searches',
                 'mode': 'lines+markers',
                 'line': {
@@ -190,6 +200,8 @@ app.layout = html.Div([
             'data': [{
                 'x': youtube_search_counts['date'],
                 'y': youtube_search_counts['counts'],
+                'text': youtube_search_counts['hover_text'],
+                'hoverinfo': 'text',
                 'name': 'YouTube Searches',
                 'mode': 'lines+markers',
                 'line': {
@@ -208,6 +220,8 @@ app.layout = html.Div([
             {
                 'x': youtube_watch_counts['date'],
                 'y': youtube_watch_counts['counts'],
+                'text': youtube_watch_counts['hover_text'],
+                'hoverinfo': 'text',
                 'name': 'YouTube Video Watches',
                 'mode': 'lines+markers',
                 'line': {
